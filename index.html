@@ -1,0 +1,1115 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="因數與倍數、公因數與公倍數的切水果遊戲，有道具、果王 Boss 與排行榜。">
+<meta name="theme-color" content="#17404F">
+<meta property="og:type" content="website">
+<meta property="og:title" content="飛果大挑戰">
+<meta property="og:description" content="因數與倍數、公因數與公倍數的切水果遊戲，有道具、果王 Boss 與排行榜。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%f0%9f%a5%ad%3C/text%3E%3C/svg%3E">
+<title>飛果大挑戰</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Chiron+GoRound+TC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* Layout: 黃昏果園 — 整個畫面是一片天空，水果帶著數字飛過；上方吊著一塊木牌寫題目，兩側是愛心和分數時間。
+   選單與結算是蓋在果園上的奶油色紙卡，內容靠左對齊。刻意只做一種配色（黃昏果園），投影在白板上對比最清楚。 */
+:root{
+  --dusk:#17404F;     /* 天頂的深青 */
+  --glow:#F6A65A;     /* 地平線的芒果橘 */
+  --sun:#FFD873;
+  --leaf:#1F6B4C;     /* 前景葉片 */
+  --leaf2:#0E3A2C;
+  --paper:#FFF4DA;    /* 紙卡 */
+  --paper2:#F3DFB4;
+  --wood:#8A5429;     /* 題目木牌 */
+  --wood2:#B5743A;
+  --ink:#241D17;
+  --berry:#E4405F;    /* 愛心、答錯 */
+  --lime:#9BD23C;     /* 答對 */
+  --muted:#7C6A52;
+  --f-zh:"Chiron GoRound TC","Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif;
+  --f-num:"Lilita One","Chiron GoRound TC","Arial Rounded MT Bold",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--dusk);color:var(--ink);font-family:var(--f-zh);font-weight:700;overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:4px solid var(--sun);outline-offset:3px}
+
+/* ---------- 果園場景 ---------- */
+.orchard{position:fixed;inset:0;overflow:hidden;
+  background:linear-gradient(var(--dusk) 0%,#2C6B6E 38%,#E9925A 78%,var(--glow) 100%)}
+.sunball{position:absolute;left:50%;bottom:-16vmin;width:64vmin;height:64vmin;margin-left:-32vmin;border-radius:50%;
+  background:radial-gradient(circle,var(--sun) 0 38%,rgba(255,216,115,.45) 39% 56%,rgba(255,216,115,.16) 57% 70%,transparent 71%)}
+.foliage{position:absolute;left:0;width:100%;pointer-events:none}
+.foliage.back{bottom:0;height:34vh;color:#2A7A5A;opacity:.75}
+.foliage.front{bottom:0;height:24vh;color:var(--leaf2)}
+.canopy{position:absolute;top:0;left:0;width:100%;height:20vh;color:var(--leaf2);pointer-events:none}
+
+/* ---------- 遊戲畫面 ---------- */
+.stage{position:fixed;inset:0}
+.hud{position:absolute;left:0;right:0;top:0;z-index:5;display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:12px;
+  padding:calc(10px + env(safe-area-inset-top,0px)) 16px 0;pointer-events:none}
+.hud > *{pointer-events:auto}
+.hearts{display:flex;gap:6px;align-items:center;padding-top:10px}
+.hearts svg{width:clamp(30px,3.6vw,52px);height:auto;transition:transform .25s,opacity .25s}
+.hearts path{fill:var(--berry);stroke:var(--ink);stroke-width:2.5;stroke-linejoin:round}
+.hearts .gone{opacity:.28;transform:scale(.8)}
+.hearts .gone path{fill:var(--paper2)}
+.hearts .lost{animation:heartPop .5s}
+@keyframes heartPop{30%{transform:scale(1.5) rotate(-12deg)}}
+
+.sign{position:relative;margin-top:22px;min-width:min(60vw,300px);max-width:min(60vw,980px);text-align:center;
+  background:linear-gradient(var(--wood2),var(--wood));border:5px solid var(--ink);border-radius:18px;box-shadow:0 8px 0 var(--ink);
+  padding:10px clamp(16px,3vw,40px) 12px;color:var(--paper)}
+.sign::before,.sign::after{content:"";position:absolute;top:-30px;width:6px;height:28px;background:var(--ink);border-radius:3px}
+.sign::before{left:16%}.sign::after{right:16%}
+.q{margin:0;font-size:clamp(22px,3.2vw,52px);font-weight:900;line-height:1.2;text-wrap:balance;text-shadow:0 3px 0 rgba(36,29,23,.55)}
+.q b{font-family:var(--f-num);font-weight:400;color:var(--sun);font-size:1.18em;padding:0 .08em}
+.q em{font-style:normal;color:var(--sun);text-decoration:underline wavy var(--berry) 3px;text-underline-offset:6px}
+.why{margin:6px 0 0;min-height:1.5em;font-size:clamp(15px,1.9vw,26px);color:var(--paper);opacity:0;transition:opacity .2s}
+.why.show{opacity:1}
+.why.good{color:#D9F59A}.why.bad{color:#FFC2CC}
+.count{position:absolute;right:10px;bottom:-34px;font-size:clamp(13px,1.3vw,18px);color:var(--paper);background:var(--ink);border-radius:999px;padding:2px 12px}
+
+.meters{display:flex;justify-content:flex-end;align-items:flex-start;gap:10px;padding-top:6px;flex-wrap:wrap}
+.meter{background:var(--paper);border:4px solid var(--ink);border-radius:14px;box-shadow:0 5px 0 var(--ink);padding:2px 14px 4px;text-align:center;min-width:clamp(84px,9vw,140px)}
+.meter small{display:block;font-size:clamp(12px,1.2vw,16px);color:var(--muted)}
+.meter span{font-family:var(--f-num);font-size:clamp(26px,3.2vw,48px);line-height:1;font-variant-numeric:tabular-nums}
+.meter.low span{color:var(--berry);animation:tick 1s steps(2) infinite}
+@keyframes tick{50%{opacity:.45}}
+.iconbtn{width:clamp(48px,4.6vw,64px);height:clamp(48px,4.6vw,64px);border-radius:14px;border:4px solid var(--ink);background:var(--sun);box-shadow:0 5px 0 var(--ink);display:grid;place-items:center}
+.iconbtn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.iconbtn svg{width:56%;height:56%;fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.streak{position:absolute;left:16px;top:calc(clamp(30px,3.6vw,52px) + 34px);font-size:clamp(15px,1.7vw,24px);color:var(--paper);background:var(--berry);border:3px solid var(--ink);border-radius:999px;padding:1px 14px;transform:rotate(-4deg)}
+
+/* 飛果 */
+.sky{position:absolute;inset:0;overflow:hidden;z-index:2}
+.fruit{position:absolute;left:0;top:0;width:var(--fs);height:var(--fs);margin:calc(var(--fs) / -2) 0 0 calc(var(--fs) / -2);
+  border:0;background:none;padding:0;will-change:transform;display:grid;place-items:center}
+.fruit svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 8px 0 rgba(36,29,23,.28));pointer-events:none}
+.fruit span{position:relative;font-family:var(--f-num);font-size:calc(var(--fs) * .36);line-height:1;color:var(--paper);
+  -webkit-text-stroke:calc(var(--fs) * .055) var(--ink);paint-order:stroke fill;pointer-events:none;transform:translateY(6%)}
+.fruit.long span{font-size:calc(var(--fs) * .29)}
+.fruit.hit{pointer-events:none}
+.fruit.hit .body{animation:burst .45s ease-out forwards}
+.fruit.miss .body{animation:wobble .5s}
+.fruit.miss svg{filter:grayscale(1) brightness(.75)}
+.fruit.fade{pointer-events:none;opacity:0;transition:opacity .35s}
+.body{position:absolute;inset:0;display:grid;place-items:center;font-style:normal}
+@keyframes burst{40%{transform:scale(1.35)}100%{transform:scale(.1);opacity:0}}
+@keyframes wobble{20%{transform:rotate(-14deg)}50%{transform:rotate(12deg)}80%{transform:rotate(-6deg)}}
+.pop{position:absolute;z-index:4;pointer-events:none;font-family:var(--f-num);font-size:clamp(28px,3.6vw,56px);color:var(--lime);
+  -webkit-text-stroke:6px var(--ink);paint-order:stroke fill;transform:translate(-50%,-50%);animation:rise .9s ease-out forwards}
+.pop.bad{color:var(--berry)}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}20%{opacity:1;transform:translate(-50%,-60%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-190%)}}
+.drop{position:absolute;z-index:3;width:14px;height:14px;border-radius:50%;pointer-events:none;animation:splash .6s ease-out forwards}
+@keyframes splash{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+
+/* ---------- 紙卡（選單、暫停、結算） ---------- */
+.veil{position:fixed;inset:0;z-index:10;overflow:auto;display:grid;place-items:center;padding:20px 16px;background:rgba(14,58,44,.5)}
+.card{width:100%;max-width:980px;background:var(--paper);border:5px solid var(--ink);border-radius:26px;box-shadow:0 12px 0 var(--ink);
+  padding:clamp(18px,3vw,36px);display:flex;flex-direction:column;gap:clamp(14px,2.2vh,24px)}
+.card.small{max-width:560px;text-align:center;align-items:center}
+h1{margin:0;font-size:clamp(38px,6.4vw,92px);font-weight:900;line-height:1;letter-spacing:.02em;color:var(--sun);
+  -webkit-text-stroke:clamp(7px,1vw,13px) var(--ink);paint-order:stroke fill;text-shadow:0 clamp(5px,.7vw,9px) 0 var(--berry)}
+.lead{margin:6px 0 0;font-size:clamp(16px,1.8vw,22px);color:var(--muted);max-width:40em}
+h2{margin:0;font-size:clamp(30px,4.4vw,56px);font-weight:900}
+.grp{display:flex;flex-direction:column;gap:8px;min-width:0}
+.grp > label,.grp > span.lab{font-size:clamp(17px,1.8vw,22px)}
+.games{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.game{text-align:left;border:4px solid var(--ink);border-radius:18px;background:var(--paper2);box-shadow:0 6px 0 var(--ink);padding:14px 16px;
+  display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center;transition:transform .08s,box-shadow .08s}
+.game svg{grid-row:span 2;width:clamp(56px,6vw,84px);height:auto}
+.game b{font-size:clamp(20px,2.4vw,30px);font-weight:900}
+.game span{font-size:clamp(14px,1.4vw,17px);color:var(--muted)}
+.game[aria-checked="true"]{background:var(--sun);transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
+.game[aria-checked="true"] span{color:var(--ink)}
+.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2vw,24px)}
+.seg{display:flex;border:4px solid var(--ink);border-radius:14px;overflow:hidden;background:var(--paper2)}
+.seg button{flex:1;border:0;background:none;padding:10px 4px;font-size:clamp(16px,1.7vw,21px);border-left:3px solid var(--ink)}
+.seg button:first-child{border-left:0}
+.seg button[aria-checked="true"]{background:var(--ink);color:var(--paper)}
+.hint{font-size:clamp(13px,1.3vw,16px);color:var(--muted);min-height:1.4em}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.btn{border:4px solid var(--ink);border-radius:16px;box-shadow:0 6px 0 var(--ink);background:var(--paper2);padding:10px 22px;font-size:clamp(18px,2vw,24px);font-weight:900}
+.btn:active{transform:translateY(5px);box-shadow:0 1px 0 var(--ink)}
+.btn.go{background:var(--lime);font-size:clamp(26px,3.2vw,42px);padding:12px 44px;flex:1}
+.best{font-size:clamp(14px,1.5vw,18px);color:var(--muted)}
+.best b{font-family:var(--f-num);font-weight:400;color:var(--ink);font-size:1.3em}
+
+.big{font-family:var(--f-num);font-size:clamp(64px,10vw,130px);line-height:1;color:var(--sun);-webkit-text-stroke:10px var(--ink);paint-order:stroke fill}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0;width:100%}
+.stats div{background:var(--paper2);border:3px solid var(--ink);border-radius:14px;padding:6px}
+.stats dt{font-size:clamp(13px,1.3vw,16px);color:var(--muted)}
+.stats dd{margin:0;font-family:var(--f-num);font-size:clamp(24px,3vw,40px);line-height:1.1}
+.review{width:100%;text-align:left;border:3px dashed var(--muted);border-radius:14px;padding:10px 16px;max-height:30vh;overflow:auto}
+.review h3{margin:0 0 6px;font-size:clamp(16px,1.7vw,20px)}
+.review ul{margin:0;padding-left:1.2em;display:grid;gap:4px;font-size:clamp(15px,1.5vw,18px)}
+.review li b{color:var(--leaf)}
+.res-top{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;width:100%}
+.res-top p{margin:4px 0 0;color:var(--muted);font-size:clamp(15px,1.6vw,20px)}
+
+@media (max-width:760px){
+  .hud{grid-template-columns:1fr 1fr}
+  .sign{grid-column:1 / -1;grid-row:2;max-width:none;margin-top:30px}
+  .games,.opts{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .res-top{grid-template-columns:1fr}
+  .streak{display:none}
+}
+@media (prefers-reduced-motion:reduce){ .meter.low span,.hearts .lost{animation:none} }
+
+/* 忍者切水果：刀光、兩半、道具 */
+.sky{touch-action:none;cursor:crosshair}
+.fruit{pointer-events:none}
+.fx{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+.flash{position:absolute;inset:0;z-index:4;background:#fff;opacity:0;pointer-events:none}
+.flash.go{animation:flash .45s ease-out}
+@keyframes flash{0%{opacity:.85}100%{opacity:0}}
+.stage.shake{animation:shake .35s}
+@keyframes shake{20%{transform:translate(-10px,4px)}40%{transform:translate(9px,-5px)}60%{transform:translate(-6px,3px)}80%{transform:translate(4px,-2px)}}
+.half{position:absolute;z-index:3;width:var(--fs);height:var(--fs);margin:calc(var(--fs) / -2) 0 0 calc(var(--fs) / -2);pointer-events:none}
+.half i{position:absolute;inset:0;animation:.6s cubic-bezier(.2,.7,.4,1) forwards}
+.half i svg{width:100%;height:100%}
+.half i.l{clip-path:inset(-10% 50% -10% -10%);animation-name:splitL}
+.half i.r{clip-path:inset(-10% -10% -10% 50%);animation-name:splitR}
+@keyframes splitL{to{transform:translate(calc(var(--fs) * -.75),calc(var(--fs) * .25)) rotate(-55deg);opacity:0}}
+@keyframes splitR{to{transform:translate(calc(var(--fs) * .75),calc(var(--fs) * .25)) rotate(55deg);opacity:0}}
+.fruit.glow svg{filter:drop-shadow(0 0 10px #fff) drop-shadow(0 0 22px var(--sun)) drop-shadow(0 8px 0 rgba(36,29,23,.28))}
+.orb{display:grid;place-items:center;width:78%;height:78%;border-radius:50%;font-size:calc(var(--fs) * .42);line-height:1;font-weight:400;
+  background:radial-gradient(circle at 35% 30%,#fff,var(--sun) 70%);border:calc(var(--fs) * .04) solid var(--ink);
+  box-shadow:0 0 0 calc(var(--fs) * .035) var(--paper),0 0 26px 8px rgba(255,216,115,.8),0 8px 0 rgba(36,29,23,.28)}
+.fruit.bomb .orb{background:radial-gradient(circle at 35% 30%,#6B6259,var(--ink) 70%);box-shadow:0 0 0 calc(var(--fs) * .035) var(--berry),0 0 26px 8px rgba(228,64,95,.7),0 8px 0 rgba(36,29,23,.28)}
+.buffs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.buffs span{background:var(--paper);border:3px solid var(--ink);border-radius:999px;padding:1px 12px;font-size:clamp(14px,1.5vw,20px);font-family:var(--f-num),var(--f-zh)}
+.streak{position:static;display:inline-block;margin-top:8px}
+.legend{margin:0;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:clamp(14px,1.4vw,17px)}
+.legend b{margin-right:4px}
+.legend span{background:var(--paper2);border:2px solid var(--ink);border-radius:999px;padding:2px 12px}
+.legend .no{background:var(--ink);color:var(--paper)}
+@media (prefers-reduced-motion:reduce){ .stage.shake,.flash.go{animation:none} }
+
+/* 多答案提示、Boss、排行榜 */
+.count.multi{background:var(--sun);color:var(--ink);border:3px solid var(--ink);font-size:clamp(15px,1.6vw,22px)}
+.weak{display:block;font-size:.5em;color:#FFC2CC;letter-spacing:.1em}
+.bossbar{position:relative;height:26px;margin-top:8px;border:4px solid var(--ink);border-radius:999px;background:var(--ink);overflow:hidden}
+.bossbar i{position:absolute;inset:0 auto 0 0;width:100%;background:linear-gradient(90deg,var(--berry),#FF8E1F);transition:width .25s}
+.bossbar span{position:relative;display:block;text-align:center;font-size:clamp(13px,1.3vw,17px);line-height:18px;color:var(--paper)}
+.boss{position:absolute;left:50%;top:56%;z-index:1;width:min(48vh,38vw);transform:translate(-50%,-50%);pointer-events:none}
+.boss svg{display:block;width:100%;height:auto;filter:drop-shadow(0 14px 0 rgba(36,29,23,.3));animation:bossBob 2.2s ease-in-out infinite}
+.boss.in{animation:bossIn .7s cubic-bezier(.2,1.5,.4,1) both}
+.boss.hurt svg{animation:bossHurt .35s}
+.boss.dead{animation:bossDead .7s ease-in forwards}
+.boss.out{animation:bossOut .7s ease-in forwards}
+@keyframes bossBob{50%{transform:translateY(-12px) rotate(2deg)}}
+@keyframes bossIn{from{transform:translate(-50%,-50%) scale(0) rotate(-40deg)}}
+@keyframes bossHurt{30%{transform:translateX(-16px) rotate(-8deg);filter:brightness(2) saturate(0)}60%{transform:translateX(12px) rotate(6deg)}}
+@keyframes bossDead{to{transform:translate(-50%,-50%) scale(.1) rotate(540deg);opacity:0}}
+@keyframes bossOut{to{transform:translate(-50%,-260%);opacity:0}}
+#pname{font:inherit;font-size:clamp(20px,2.4vw,30px);font-weight:900;padding:8px 14px;border:4px solid var(--ink);border-radius:14px;background:#fff;color:var(--ink);
+  max-width:520px;width:100%;-webkit-user-select:text;user-select:text}
+#pname::placeholder{color:var(--paper2)}
+#pname:focus-visible{outline:4px solid var(--sun);outline-offset:3px}
+.veil.top{z-index:20}
+.seg2{display:flex;border:4px solid var(--ink);border-radius:14px;overflow:hidden;background:var(--paper2)}
+.seg2 button{border:0;background:none;padding:8px 16px;font-size:clamp(15px,1.6vw,20px);border-left:3px solid var(--ink)}
+.seg2 button:first-child{border-left:0}
+.seg2 button[aria-checked="true"]{background:var(--ink);color:var(--paper)}
+.tablewrap{overflow-x:auto;border:4px solid var(--ink);border-radius:14px;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:clamp(15px,1.6vw,21px)}
+th,td{padding:7px 10px;text-align:center;white-space:nowrap}
+th{background:var(--wood);color:var(--paper);font-size:.82em}
+td.nm{text-align:left;font-weight:900}
+td.sc{font-family:var(--f-num);font-size:1.25em}
+tbody tr:nth-child(even){background:var(--paper)}
+tbody tr.me{background:var(--sun)}
+.medal{display:inline-grid;place-items:center;min-width:30px;height:30px;border-radius:999px;font-family:var(--f-num)}
+.m1{background:var(--sun);border:2px solid var(--ink)}.m2{background:#D9E2EC;border:2px solid var(--ink)}.m3{background:#E4A267;border:2px solid var(--ink)}
+.empty{padding:22px;color:var(--muted)}
+.btn.armed{background:var(--berry);color:var(--paper)}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="g-mango" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#FFE36E"/><stop offset=".55" stop-color="#FF9F2E"/><stop offset="1" stop-color="#E4483A"/></radialGradient>
+    <radialGradient id="g-apple" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#FF8A7A"/><stop offset=".6" stop-color="#E12F45"/><stop offset="1" stop-color="#9E1B3A"/></radialGradient>
+    <radialGradient id="g-pear" cx=".4" cy=".3" r=".9"><stop offset="0" stop-color="#F4F58A"/><stop offset=".6" stop-color="#B9D645"/><stop offset="1" stop-color="#6FA62E"/></radialGradient>
+    <radialGradient id="g-orange" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#FFD27A"/><stop offset=".6" stop-color="#FF8E1F"/><stop offset="1" stop-color="#D9601A"/></radialGradient>
+    <radialGradient id="g-plum" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#C49BFF"/><stop offset=".6" stop-color="#7B4FD6"/><stop offset="1" stop-color="#49299A"/></radialGradient>
+    <radialGradient id="g-melon" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#8EE08A"/><stop offset=".6" stop-color="#2FA35A"/><stop offset="1" stop-color="#176B3C"/></radialGradient>
+
+    <symbol id="f-mango" viewBox="0 0 200 200">
+      <path d="M150 30c8-10 22-12 30-8-2 12-12 20-26 20z" fill="#3FA65A" stroke="#241D17" stroke-width="6" stroke-linejoin="round"/>
+      <path d="M24 112c-4-48 40-88 92-84 48 4 70 40 64 80-6 44-50 70-98 64-36-4-56-28-58-60z" fill="url(#g-mango)" stroke="#241D17" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M52 78c10-20 30-32 52-34" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="9" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="f-apple" viewBox="0 0 200 200">
+      <path d="M100 52c0-16 6-28 18-36" fill="none" stroke="#241D17" stroke-width="8" stroke-linecap="round"/>
+      <path d="M112 34c14-14 34-14 46-6-8 16-28 20-46 6z" fill="#3FA65A" stroke="#241D17" stroke-width="6" stroke-linejoin="round"/>
+      <path d="M100 58c-22-20-78-14-78 44 0 50 34 82 56 82 10 0 14-6 22-6s12 6 22 6c22 0 56-32 56-82 0-58-56-64-78-44z" fill="url(#g-apple)" stroke="#241D17" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M46 92c4-16 16-26 30-28" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="9" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="f-pear" viewBox="0 0 200 200">
+      <path d="M100 30c2-10 8-16 16-20" fill="none" stroke="#241D17" stroke-width="8" stroke-linecap="round"/>
+      <path d="M100 26c22 0 34 16 36 38 3 30 42 40 42 78 0 36-34 46-78 46s-78-10-78-46c0-38 39-48 42-78 2-22 14-38 36-38z" fill="url(#g-pear)" stroke="#241D17" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M52 124c2-14 12-22 22-28" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="9" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="f-orange" viewBox="0 0 200 200">
+      <path d="M104 30c10-16 30-20 44-12-6 18-24 24-44 12z" fill="#3FA65A" stroke="#241D17" stroke-width="6" stroke-linejoin="round"/>
+      <circle cx="100" cy="108" r="78" fill="url(#g-orange)" stroke="#241D17" stroke-width="7"/>
+      <path d="M48 86c8-18 24-30 42-34" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="9" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="f-plum" viewBox="0 0 200 200">
+      <path d="M100 40c-2-12 2-22 10-30" fill="none" stroke="#241D17" stroke-width="8" stroke-linecap="round"/>
+      <path d="M106 28c14-10 32-8 42 2-10 14-28 14-42-2z" fill="#3FA65A" stroke="#241D17" stroke-width="6" stroke-linejoin="round"/>
+      <ellipse cx="100" cy="112" rx="72" ry="78" fill="url(#g-plum)" stroke="#241D17" stroke-width="7"/>
+      <path d="M52 90c6-18 20-30 36-34" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="9" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="f-melon" viewBox="0 0 200 200">
+      <ellipse cx="100" cy="104" rx="88" ry="72" fill="url(#g-melon)" stroke="#241D17" stroke-width="7"/>
+      <path d="M40 60c-14 30-14 60 0 88M72 40c-16 40-16 90 0 128M128 40c16 40 16 90 0 128M160 60c14 30 14 60 0 88" fill="none" stroke="#0E3A2C" stroke-opacity=".5" stroke-width="7" stroke-linecap="round"/>
+      <path d="M100 32c0-10 6-16 14-18" fill="none" stroke="#241D17" stroke-width="7" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="heart" viewBox="0 0 32 30"><path d="M16 28C4 19 1 13 1 8.5A7 7 0 0 1 16 6a7 7 0 0 1 15 2.5C31 13 28 19 16 28z"/></symbol>
+    <symbol id="leaf" viewBox="0 0 120 60"><path d="M0 60C10 20 50 0 120 4 100 44 60 60 0 60z" fill="currentColor"/></symbol>
+  </defs>
+</svg>
+
+<!-- ===== 果園背景 ===== -->
+</head>
+<body>
+<div class="orchard" aria-hidden="true">
+  <div class="sunball"></div>
+  <svg class="canopy" viewBox="0 0 1200 200" preserveAspectRatio="none">
+    <path d="M0 0h1200v40c-60 50-110 10-160 60-40-70-120-20-170 20-30-60-90-70-150-30-50-50-120-40-170 10-40-50-110-60-160-10-50-40-110-30-150 20C200 60 120 60 80 110 60 70 30 50 0 60z" fill="currentColor"/>
+  </svg>
+  <svg class="foliage back" viewBox="0 0 1200 300" preserveAspectRatio="none">
+    <path d="M0 300V150c40-60 90-70 130-20 30-80 110-100 160-30 40-70 120-70 160 0 50-90 140-80 170 10 40-70 120-80 160-10 40-80 130-90 170-10 40-60 110-70 150-10 30-50 70-50 100-20H1200V300z" fill="currentColor"/>
+  </svg>
+  <svg class="foliage front" viewBox="0 0 1200 220" preserveAspectRatio="none">
+    <path d="M0 220V90c30-50 80-50 110 0 20-70 90-90 130-20 30-60 100-60 130 10 40-80 120-80 150 0 30-60 100-70 130-10 40-70 110-70 140 0 30-60 100-60 130 0 30-50 90-50 120 0 30-40 70-40 110-10H1200V220z" fill="currentColor"/>
+  </svg>
+</div>
+
+<!-- ===== 遊戲畫面 ===== -->
+<div class="stage" id="stage" hidden>
+  <div class="boss" id="boss" hidden aria-hidden="true">
+    <svg viewBox="0 0 240 250">
+      <path d="M70 52l14-34 22 26 14-32 14 32 22-26 14 34z" fill="#FFD873" stroke="#241D17" stroke-width="6" stroke-linejoin="round"/>
+      <path id="bossBody" fill="url(#g-pear)" stroke="#241D17" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M62 112l44 16M178 112l-44 16" stroke="#241D17" stroke-width="9" stroke-linecap="round"/>
+      <ellipse cx="86" cy="140" rx="17" ry="20" fill="#fff" stroke="#241D17" stroke-width="5"/><ellipse cx="154" cy="140" rx="17" ry="20" fill="#fff" stroke="#241D17" stroke-width="5"/>
+      <circle cx="90" cy="144" r="8" fill="#241D17"/><circle cx="150" cy="144" r="8" fill="#241D17"/>
+      <path d="M78 190l14-12 14 12 14-12 14 12 14-12 14 12" fill="none" stroke="#241D17" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="sky" id="sky"></div>
+  <canvas class="fx" id="fx"></canvas>
+  <div class="flash" id="flash"></div>
+  <div class="hud">
+    <div>
+      <div class="hearts" id="hearts" aria-label="剩下的愛心"></div>
+      <div class="streak" id="streak" hidden></div>
+      <div class="buffs" id="buffs"></div>
+    </div>
+    <div class="sign">
+      <p class="q" id="q"></p>
+      <p class="why" id="why" role="status" aria-live="polite"></p>
+      <div class="bossbar" id="bossBar" hidden><i id="bossHp"></i><span id="bossT"></span></div>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="meters">
+      <div class="meter"><small>分數</small><span id="score">0</span></div>
+      <div class="meter" id="timeBox"><small>剩餘時間</small><span id="time">3:00</span></div>
+      <button type="button" class="iconbtn" id="pauseBtn" aria-label="暫停"><svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 選單 ===== -->
+<div class="veil" id="menu">
+  <div class="card">
+    <div>
+      <h1>飛果大挑戰</h1>
+      <p class="lead">看清楚木牌上的題目，水果會從下面拋上來。用手指劃過寫著正確答案的水果，把它切開！有些題目要切好幾顆，每答對 8 題果王就會出現。</p>
+    </div>
+
+    <div class="grp">
+      <label class="lab" for="pname">你的名字（會登記在排行榜）</label>
+      <input id="pname" type="text" maxlength="10" placeholder="例如：5年3班 小明" autocomplete="off">
+    </div>
+
+    <div class="grp">
+      <span class="lab">想玩哪一個？</span>
+      <div class="games" role="radiogroup" aria-label="遊戲" id="games">
+        <button type="button" class="game" role="radio" data-game="fm">
+          <svg viewBox="0 0 200 200"><use href="#f-mango"/></svg>
+          <b>因數與倍數</b><span>第 2 單元：找倍數、找因數、整除</span>
+        </button>
+        <button type="button" class="game" role="radio" data-game="common">
+          <svg viewBox="0 0 200 200"><use href="#f-plum"/></svg>
+          <b>公因數與公倍數</b><span>第 4 單元：公倍數、公因數、最小公倍數、最大公因數</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="opts">
+      <div class="grp">
+        <span class="lab">題目難度</span>
+        <div class="seg" role="radiogroup" aria-label="題目難度" data-opt="diff">
+          <button type="button" role="radio" data-v="0">簡單</button>
+          <button type="button" role="radio" data-v="1">普通</button>
+          <button type="button" role="radio" data-v="2">挑戰</button>
+        </div>
+        <span class="hint" id="diffHint"></span>
+      </div>
+      <div class="grp">
+        <span class="lab">飛果速度</span>
+        <div class="seg" role="radiogroup" aria-label="飛果速度" data-opt="speed">
+          <button type="button" role="radio" data-v="0">很慢</button>
+          <button type="button" role="radio" data-v="1">慢</button>
+          <button type="button" role="radio" data-v="2">中</button>
+          <button type="button" role="radio" data-v="3">快</button>
+          <button type="button" role="radio" data-v="4">超快</button>
+        </div>
+        <span class="hint" id="speedHint"></span>
+      </div>
+      <div class="grp">
+        <span class="lab">遊戲時間</span>
+        <div class="seg" role="radiogroup" aria-label="遊戲時間" data-opt="mins">
+          <button type="button" role="radio" data-v="1">1 分</button>
+          <button type="button" role="radio" data-v="2">2 分</button>
+          <button type="button" role="radio" data-v="3">3 分</button>
+          <button type="button" role="radio" data-v="5">5 分</button>
+        </div>
+        <span class="hint">時間到，或 5 顆愛心用完，遊戲就結束</span>
+      </div>
+    </div>
+
+    <p class="legend"><b>會掉下來的道具</b><span>❄️ 水果變慢</span><span>⭐ 分數加倍</span><span>⏰ 多 10 秒</span><span>💗 補一顆愛心</span><span>🔍 正確答案發光</span><span class="no">💣 炸彈不要切！</span></p>
+    <div class="row">
+      <button type="button" class="btn go" id="startBtn">開始摘果</button>
+      <button type="button" class="btn" id="boardBtn">排行榜</button>
+      <button type="button" class="btn" id="musicBtn" aria-pressed="true">音樂開</button>
+      <button type="button" class="btn" id="soundBtn" aria-pressed="true">音效開</button>
+      <span class="best" id="bestLine"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 暫停 ===== -->
+<div class="veil" id="pause" hidden>
+  <div class="card small">
+    <h2>暫停中</h2>
+    <p class="lead">時間停住了，水果也停在半空中。</p>
+    <div class="row" style="justify-content:center">
+      <button type="button" class="btn go" id="resumeBtn">繼續</button>
+      <button type="button" class="btn" id="quitBtn">回選單</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 結算 ===== -->
+<div class="veil" id="result" hidden>
+  <div class="card">
+    <div class="res-top">
+      <div>
+        <h2 id="resTitle">時間到！</h2>
+        <p id="resSub"></p>
+      </div>
+      <div class="big" id="resScore">0</div>
+    </div>
+    <dl class="stats">
+      <div><dt>答對題數</dt><dd id="resRight">0</dd></div>
+      <div><dt>切錯次數</dt><dd id="resWrong">0</dd></div>
+      <div><dt>正確率</dt><dd id="resAcc">0%</dd></div>
+      <div><dt>最高連續答對</dt><dd id="resStreak">0</dd></div>
+    </dl>
+    <div class="review" id="review"></div>
+    <div class="row">
+      <button type="button" class="btn go" id="againBtn">再玩一次</button>
+      <button type="button" class="btn" id="resBoardBtn">排行榜</button>
+      <button type="button" class="btn" id="menuBtn">回選單</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 排行榜 ===== -->
+<div class="veil top" id="board" hidden>
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <h2>排行榜</h2>
+      <button type="button" class="btn" id="boardClose">關閉</button>
+    </div>
+    <div class="row">
+      <div class="seg2" id="bGame" role="radiogroup" aria-label="遊戲"><button type="button" role="radio" data-v="fm">因數與倍數</button><button type="button" role="radio" data-v="common">公因數與公倍數</button></div>
+      <div class="seg2" id="bDiff" role="radiogroup" aria-label="難度"><button type="button" role="radio" data-v="0">簡單</button><button type="button" role="radio" data-v="1">普通</button><button type="button" role="radio" data-v="2">挑戰</button></div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>名次</th><th>名字</th><th>分數</th><th>答對</th><th>正確率</th><th>打倒果王</th><th>日期</th></tr></thead>
+        <tbody id="boardBody"></tbody>
+      </table>
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <span class="hint">紀錄存在這台電腦的瀏覽器裡，每個難度保留前 30 名。</span>
+      <button type="button" class="btn" id="boardClear">清除這個難度的紀錄</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const store={ get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} } };
+
+/* ---------- 數學小工具 ---------- */
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[R(0,a.length-1)];
+const shuffle=a=>{ for(let i=a.length-1;i>0;i--){ const j=R(0,i); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const uniq=a=>[...new Set(a)];
+const gcd=(a,b)=>b?gcd(b,a%b):a, lcm=(a,b)=>a*b/gcd(a,b);
+const facs=n=>{ const f=[]; for(let i=1;i<=n;i++) if(n%i===0) f.push(i); return f; };
+const div=(v,a)=> v%a===0 ? `${v} ÷ ${a} = ${v/a}，沒有餘數` : `${v} ÷ ${a} = ${Math.floor(v/a)}…${v%a}，有餘數`;
+const B=n=>`<b>${n}</b>`;
+const isMul=(v,a)=>v%a===0, isFac=(v,n)=>n%v===0;
+const yn=(ok)=>ok?'是':'不是';
+
+/* ---------- 題目產生器 ----------
+   每題回傳 {text, good:[正確答案…], bad:[錯誤選項…], why(v), hint}
+   good 可以有很多個（例如「6 的倍數」），點中任何一個都算對。 */
+const FAC_N=[[12,16,18,20,24,28,30],[32,36,40,42,45,48,54,56,60],[63,64,72,75,80,84,90,96,100]];
+const Q_FM={
+  mult(d, alt){
+    const a=[R(2,9),R(3,12),R(6,19)][d], max=[60,120,200][d];
+    const good=[]; for(let k=2;k*a<=max;k++) good.push(k*a);
+    const bad=uniq(Array.from({length:30},()=>pick(good)+R(1,a-1)*(Math.random()<.5?-1:1))).filter(v=>v>a && v%a);
+    return {text: alt?`${B(a)} 可以整除哪一個數？`:`哪一個是 ${B(a)} 的倍數？`, good, bad,
+      why:v=>`${div(v,a)}，${yn(isMul(v,a))} ${a} 的倍數`, hint:`例如 ${good.slice(0,3).join('、')}`};
+  },
+  notMult(d){
+    const q=Q_FM.mult(d);
+    const a=+q.text.match(/<b>(\d+)<\/b>/)[1];
+    return {text:`哪一個<em>不是</em> ${B(a)} 的倍數？`, good:q.bad, bad:q.good,
+      why:v=>`${div(v,a)}，${yn(isMul(v,a))} ${a} 的倍數`, hint:`例如 ${q.bad.slice(0,3).join('、')}`};
+  },
+  fac(d, alt){
+    const n=pick(FAC_N[d]), f=facs(n);
+    const good=f.filter(v=>v>1), bad=[]; for(let v=2;v<n;v++) if(n%v) bad.push(v);
+    return {text: alt?`哪一個數可以整除 ${B(n)}？`:`哪一個是 ${B(n)} 的因數？`, good, bad:shuffle(bad).slice(0,14),
+      why:v=>`${div(n,v)}，${v} ${yn(isFac(v,n))} ${n} 的因數`, hint:`${n} 的因數有 ${f.join('、')}`};
+  },
+  notFac(d){
+    const n=pick(FAC_N[d]), f=facs(n), non=[]; for(let v=2;v<n;v++) if(n%v) non.push(v);
+    return {text:`哪一個<em>不是</em> ${B(n)} 的因數？`, good:shuffle(non).slice(0,10), bad:f,
+      why:v=>`${div(n,v)}，${v} ${yn(isFac(v,n))} ${n} 的因數`, hint:`${n} 的因數只有 ${f.join('、')}`};
+  },
+  rule(){
+    const a=pick([2,5,10]), good=[], bad=[];
+    while(good.length<8){ const v=R(11,99)*a; if(v<1000) good.push(v); }
+    while(bad.length<12){ const v=R(101,999); if(v%a) bad.push(v); }
+    const tip={2:'個位數字是 0、2、4、6、8 的數，才是 2 的倍數',5:'個位數字是 0 或 5 的數，才是 5 的倍數',10:'個位數字是 0 的數，才是 10 的倍數'}[a];
+    return {text:`哪一個是 ${B(a)} 的倍數？`, good:uniq(good), bad:uniq(bad),
+      why:v=>`${v} 的個位數字是 ${v%10}，${yn(isMul(v,a))} ${a} 的倍數`, hint:tip};
+  },
+  kth(d){
+    const a=d===2?R(7,16):R(4,9), k=R(4,9), ans=a*k;
+    const bad=uniq([a*(k-1),a*(k+1),ans+k,ans-k,a+k,ans+1,a*(k+2)]).filter(v=>v>0 && v!==ans);
+    return {text:`${B(a)} 的第 ${B(k)} 個倍數是多少？`, good:[ans], bad,
+      why:v=>v===ans?`${a} × ${k} = ${ans}`:`${v} 不對，第 ${k} 個倍數要算 ${a} × ${k}`, hint:`${a} × ${k} = ${ans}`};
+  },
+  maxBelow(d){
+    const a=d===2?R(7,19):R(6,12), N=pick([100,150,200]), ans=Math.floor((N-1)/a)*a;
+    const bad=uniq([ans-a,ans+a,N-1,N-a,ans+1,ans-1,N]).filter(v=>v>0 && v!==ans);
+    return {text:`不到 ${B(N)} 的數中，${B(a)} 的倍數最大是多少？`, good:[ans], bad,
+      why:v=>v===ans?`${a} × ${ans/a} = ${ans}，再加 ${a} 就超過 ${N} 了`
+        : v>=N?`${v} 沒有比 ${N} 小` : v%a?`${div(v,a)}，不是 ${a} 的倍數` : `${v} 是 ${a} 的倍數，但還有更大的`, hint:`${a} × ${ans/a} = ${ans}`};
+  },
+  countF(d){
+    const n=pick(FAC_N[Math.max(1,d)]), f=facs(n), c=f.length;
+    const bad=uniq([c-2,c-1,c+1,c+2,c+3,c-3]).filter(v=>v>1);
+    return {text:`${B(n)} 一共有幾個因數？`, good:[c], bad,
+      why:v=>v===c?`${n} 的因數有 ${f.join('、')}，共 ${c} 個`:`${v} 個不對，記得成對找：1 和 ${n}、2 和 ${n%2?'…':n/2}…`, hint:`${f.join('、')}，共 ${c} 個`};
+  }
+};
+function pair(lo,hi,test){ for(let t=0;t<400;t++){ const a=R(lo,hi), b=R(lo,hi); if(a<b && test(a,b)) return [a,b]; } return [4,6]; }
+const Q_CM={
+  cm(d){
+    const [a,b]=pair([2,3,6][d],[9,12,18][d],(a,b)=>b%a!==0 && lcm(a,b)<=[40,72,150][d]), L=lcm(a,b);
+    const good=[L,2*L,3*L,4*L], lim=4*L+a;
+    const bad=[]; for(let v=Math.max(a,b)+1;v<=lim;v++) if((v%a===0)!==(v%b===0)) bad.push(v);
+    return {text:`哪一個是 ${B(a)} 和 ${B(b)} 的公倍數？`, good, bad:shuffle(bad).slice(0,14),
+      why:v=>`${v} ${yn(isMul(v,a))} ${a} 的倍數，${yn(isMul(v,b))} ${b} 的倍數`, hint:`公倍數有 ${L}、${2*L}、${3*L}…`};
+  },
+  notCm(d){
+    const q=Q_CM.cm(d), m=q.text.match(/<b>(\d+)<\/b>/g).map(s=>+s.replace(/\D/g,'')), [a,b]=m;
+    return {text:`哪一個<em>不是</em> ${B(a)} 和 ${B(b)} 的公倍數？`, good:q.bad, bad:q.good,
+      why:v=>`${v} ${yn(isMul(v,a))} ${a} 的倍數，${yn(isMul(v,b))} ${b} 的倍數`, hint:`公倍數只有 ${q.good.slice(0,3).join('、')}…`};
+  },
+  cf(d){
+    const [a,b]=pair([6,12,24][d],[30,48,96][d],(a,b)=>gcd(a,b)>=[2,3,4][d] && facs(gcd(a,b)).length>=3), g=gcd(a,b);
+    const good=facs(g).filter(v=>v>1), bad=[];
+    for(let v=2;v<=b;v++) if(!(a%v===0 && b%v===0) && (a%v===0 || b%v===0 || Math.random()<.25)) bad.push(v);
+    return {text:`哪一個是 ${B(a)} 和 ${B(b)} 的公因數？`, good, bad:shuffle(bad).slice(0,14),
+      why:v=>`${v} ${yn(isFac(v,a))} ${a} 的因數，${yn(isFac(v,b))} ${b} 的因數`, hint:`公因數有 ${facs(g).join('、')}`};
+  },
+  lcmQ(d){
+    const [a,b]=pair([2,3,6][d],[9,12,20][d],(a,b)=>lcm(a,b)<=[40,90,180][d]), L=lcm(a,b);
+    const bad=uniq([a*b,2*L,3*L,gcd(a,b),a,b,L+a,L-a,L+b,b*2,a*2]).filter(v=>v>1 && v!==L);
+    return {text:`${B(a)} 和 ${B(b)} 的最小公倍數是多少？`, good:[L], bad,
+      why:v=>v===L?`${a} 和 ${b} 的公倍數有 ${L}、${2*L}、${3*L}…，最小的是 ${L}`
+        : (v%a===0 && v%b===0)?`${v} 是公倍數，但還有更小的公倍數`
+        : `${v} ${yn(isMul(v,a))} ${a} 的倍數，${yn(isMul(v,b))} ${b} 的倍數`, hint:`最小公倍數是 ${L}`};
+  },
+  gcdQ(d){
+    const [a,b]=pair([6,12,24][d],[30,48,96][d],(a,b)=>gcd(a,b)>=[2,3,4][d]), g=gcd(a,b), cf=facs(g);
+    const bad=uniq([...cf.filter(v=>v!==g), ...facs(a).filter(v=>b%v), ...facs(b).filter(v=>a%v), g*2, g+1]).filter(v=>v>0 && v!==g);
+    return {text:`${B(a)} 和 ${B(b)} 的最大公因數是多少？`, good:[g], bad:shuffle(bad).slice(0,12),
+      why:v=>v===g?`${a} 和 ${b} 的公因數有 ${cf.join('、')}，最大的是 ${g}`
+        : (a%v===0 && b%v===0)?`${v} 是公因數，但還有更大的公因數`
+        : `${v} ${yn(isFac(v,a))} ${a} 的因數，${yn(isFac(v,b))} ${b} 的因數`, hint:`公因數有 ${cf.join('、')}，最大公因數是 ${g}`};
+  },
+  countCf(d){
+    const [a,b]=pair(12,[48,60,96][d],(a,b)=>facs(gcd(a,b)).length>=3), cf=facs(gcd(a,b)), c=cf.length;
+    const bad=uniq([c-2,c-1,c+1,c+2,c+3]).filter(v=>v>0);
+    return {text:`${B(a)} 和 ${B(b)} 的公因數一共有幾個？`, good:[c], bad,
+      why:v=>v===c?`公因數有 ${cf.join('、')}，共 ${c} 個`:`${v} 個不對，先各自列出因數，再找相同的`, hint:`${cf.join('、')}，共 ${c} 個`};
+  }
+};
+// 每個難度會出哪些題型（重複寫代表出現機率比較高）
+const MIX={
+  fm:[ ['mult','mult','fac','fac','rule'],
+       ['mult','fac','multAlt','facAlt','notMult','notFac','kth','rule','maxBelow'],
+       ['mult','fac','notMult','notFac','multAlt','facAlt','kth','countF','maxBelow','maxBelow'] ],
+  common:[ ['cm','cm','cf','cf','lcmQ','gcdQ'],
+           ['cm','cf','lcmQ','lcmQ','gcdQ','gcdQ','notCm'],
+           ['lcmQ','lcmQ','gcdQ','gcdQ','cm','cf','notCm','countCf','countCf'] ]
+};
+function makeQ(game, d){
+  for(let t=0;t<30;t++){
+    const kind=pick(MIX[game][d]);
+    let q;
+    if(game==='fm') q = kind==='multAlt'?Q_FM.mult(d,true) : kind==='facAlt'?Q_FM.fac(d,true) : Q_FM[kind](d);
+    else q=Q_CM[kind](d);
+    q.good=uniq(q.good); q.bad=uniq(q.bad).filter(v=>!q.good.includes(v));
+    if(q.good.length && q.bad.length>=3 && q.text!==lastText){ lastText=q.text; return q; }
+  }
+  return Q_FM.mult(0);
+}
+let lastText='';
+
+/* ---------- 設定 ---------- */
+const DIFF_HINT={ fm:['數字比較小：找倍數、找因數、2、5、10 的倍數','加入「不是…的」和整除的問法','數字比較大，還會問因數有幾個'],
+                  common:['數字比較小：找公倍數、公因數','加入最小公倍數、最大公因數','數字比較大，還會問公因數有幾個'] };
+const SPEED=[ {life:13, gap:2.2, hint:'水果慢慢飄，有很多時間想'}, {life:10, gap:1.8, hint:'比較慢，適合剛開始練習'},
+              {life:7.5, gap:1.35, hint:'一般速度'}, {life:5.5, gap:1.05, hint:'要算得快一點'}, {life:4, gap:.8, hint:'高手限定，眼睛要跟上！'} ];
+const FRUITS=['mango','apple','pear','orange','plum','melon'];
+const cfg=Object.assign({game:'fm', diff:0, speed:2, mins:3}, store.get('fruit-cfg')||{});
+let soundOn = store.get('fruit-sound')!==false;
+
+/* ---------- 音效 ---------- */
+let ac=null;
+function beep(f,d=.09,type='triangle',vol=.08,delay=0){
+  if(!soundOn) return;
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    if(ac.state==='suspended') ac.resume();
+    const t=ac.currentTime+delay, o=ac.createOscillator(), g=ac.createGain();
+    o.type=type; o.frequency.value=f;
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t+d+.02);
+  }catch(e){}
+}
+
+/* ---------- 遊戲狀態 ---------- */
+const sky=$('#sky');
+let G=null, fruits=[], lastFrame=0, whyT=null;
+function newGame(){
+  G={ game:cfg.game, diff:cfg.diff, speed:cfg.speed, timeLeft:cfg.mins*60, total:cfg.mins*60,
+      hearts:5, score:0, right:0, wrong:0, streak:0, best:0, q:null, qMissed:false, qNo:0,
+      spawnIn:.4, itemIn:7, iceT:0, starT:0, lensT:0, sinceGood:0, lock:0, paused:false, over:false, log:[], done:0, boss:null, kills:0, pendingBoss:false, name:playerName() };
+  fruits.forEach(f=>f.el.remove()); fruits=[];
+  $$('.pop,.half').forEach(e=>e.remove()); parts=[]; rings=[]; trail=[]; $('#boss').hidden=true;
+  drawHearts(); nextQ(); hud();
+}
+function drawHearts(lostIdx){
+  $('#hearts').innerHTML=Array.from({length:5},(_,k)=>`<svg viewBox="0 0 32 30" class="${k>=G.hearts?'gone':''} ${k===lostIdx?'lost':''}"><path d="M16 28C4 19 1 13 1 8.5A7 7 0 0 1 16 6a7 7 0 0 1 15 2.5C31 13 28 19 16 28z"/></svg>`).join('');
+}
+function hud(){
+  $('#score').textContent=G.score;
+  const t=Math.max(0,Math.ceil(G.timeLeft));
+  $('#time').textContent=Math.floor(t/60)+':'+String(t%60).padStart(2,'0');
+  $('#timeBox').classList.toggle('low', t<=15);
+  const bb=$('#bossBar'); bb.hidden=!G.boss;
+  if(G.boss){ $('#bossHp').style.width=(G.boss.hp/G.boss.max*100)+'%'; $('#bossT').textContent=`果王 ${G.boss.hp}／${G.boss.max}　剩 ${Math.ceil(G.boss.t)} 秒`; }
+  const s=$('#streak'); s.hidden=G.streak<3; s.textContent=`連續答對 ${G.streak} 題`;
+  $('#buffs').innerHTML=[[G.iceT,'❄️ 變慢'],[G.starT,'⭐ 雙倍'],[G.lensT,'🔍 找答案']].filter(b=>b[0]>0).map(b=>`<span>${b[1]} ${Math.ceil(b[0])}</span>`).join('');
+}
+function showQ(){
+  const q=G.q, left=q.need-q.got;
+  $('#q').innerHTML = (G.boss?'<span class="weak">果王的弱點</span>':'') + (q.need>1 ? q.text.replace('哪一個數','哪些數').replace('哪一個','哪些') : q.text);
+  $('#count').textContent = G.boss ? `果王來襲！` : q.need>1 ? `第 ${G.qNo} 題｜要切 ${q.need} 顆，還差 ${left} 顆` : `第 ${G.qNo} 題`;
+  $('#count').classList.toggle('multi', q.need>1 && !G.boss);
+}
+function nextQ(){
+  const q=makeQ(G.game,G.diff);
+  // 答案不只一個的題目（例如「6 的倍數」）要切好幾顆才過關
+  q.need = q.good.length>=3 ? Math.min([2,3,3][G.diff], q.good.length-1) : 1; q.got=0;
+  G.q=q; G.qMissed=false; G.qNo++; G.sinceGood=1; G.spawnIn=.25;
+  showQ();
+}
+/* ---------- Boss：果王 ---------- */
+function bossQ(){
+  const d=G.diff, hp=[5,6,8][d];
+  for(let t=0;t<60;t++){
+    let q;
+    if(G.game==='fm') q=pick([()=>Q_FM.mult(d),()=>Q_FM.notMult(d),()=>Q_FM.notFac(d),()=>Q_FM.rule()])();
+    else if(Math.random()<.5) q=Q_CM.notCm(d);
+    else {
+      const [a,b]=pair([2,3,4][d],[8,10,12][d],(a,b)=>b%a!==0 && lcm(a,b)<=[30,48,72][d]), L=lcm(a,b);
+      const good=Array.from({length:12},(_,k)=>(k+1)*L), bad=[];
+      for(let v=Math.max(a,b)+1;v<=12*L;v++) if((v%a===0)!==(v%b===0)) bad.push(v);
+      q={text:`哪一個是 ${B(a)} 和 ${B(b)} 的公倍數？`, good, bad:shuffle(bad).slice(0,24),
+         why:v=>`${v} ${yn(isMul(v,a))} ${a} 的倍數，${yn(isMul(v,b))} ${b} 的倍數`, hint:`公倍數有 ${L}、${2*L}、${3*L}…`};
+    }
+    q.good=uniq(q.good); q.bad=uniq(q.bad).filter(v=>!q.good.includes(v));
+    if(q.good.length>=hp+2 && q.bad.length>=4){ q.need=hp; q.got=0; return q; }
+  }
+  const q=Q_FM.notMult(0); q.need=Math.min(hp,q.good.length-1); q.got=0; return q;
+}
+function startBoss(){
+  const q=bossQ();
+  G.q=q; G.qMissed=false; G.qNo++; G.sinceGood=1; G.spawnIn=1.2;
+  G.boss={hp:q.need, max:q.need, t:[40,40,45][G.diff], bombIn:5};
+  const b=$('#boss'); b.hidden=false; b.className='boss in';
+  showQ(); say(`切中 ${q.need} 顆正確的水果就能打倒果王！小心牠丟炸彈`, 'bad');
+  [196,185,175,165].forEach((f,k)=>beep(f,.22,'sawtooth',.07,k*.16));
+}
+function endBoss(win){
+  const q=G.q, b=$('#boss');
+  G.log.push({text:'果王關卡：'+q.text, ok:win, hint:q.hint});
+  if(win){
+    const bonus=Math.round(120*[1,1.5,2][G.diff]); G.score+=bonus; G.kills++;
+    G.hearts=Math.min(5,G.hearts+1); drawHearts();
+    const r=b.getBoundingClientRect(), c={x:r.left+r.width/2, y:r.top+r.height/2, fs:r.width*.5};
+    for(let k=0;k<4;k++) setTimeout(()=>burst({x:c.x+(Math.random()-.5)*r.width*.6, y:c.y+(Math.random()-.5)*r.height*.6, fs:c.fs}, Math.random()*6.28, ['#9BD23C','#FFD873','#fff','#E4405F']), k*110);
+    popText(c, '+'+bonus); say(`打倒果王！加 ${bonus} 分，還補回一顆愛心`, 'good');
+    [523,659,784,1047,1319].forEach((f,k)=>beep(f,.16,'triangle',.08,k*.09));
+    b.className='boss dead';
+  } else { say('時間到，果王逃走了！下次再挑戰', 'bad'); b.className='boss out'; }
+  setTimeout(()=>{ if(!G.boss) b.hidden=true; }, 700);
+  G.boss=null;
+  fruits.forEach(o=>{ if(!o.dead){ o.dead=true; o.el.classList.add('fade'); setTimeout(()=>o.el.remove(),400); } });
+  G.lock=1.3; G.pendingNext=true;
+}
+function say(text, cls){
+  const w=$('#why'); w.textContent=text; w.className='why show '+cls;
+  clearTimeout(whyT); whyT=setTimeout(()=>w.classList.remove('show'), 3200);
+}
+
+/* ---------- 飛果：從上面掉下來，用手指劃過去切開 ---------- */
+const ITEMS=[
+  {id:'ice',  ico:'❄️', w:2, msg:'冰凍！水果變慢 6 秒'},
+  {id:'star', ico:'⭐', w:2, msg:'雙倍星！10 秒內分數加倍'},
+  {id:'clock',ico:'⏰', w:2, msg:'加時鐘！多 10 秒'},
+  {id:'heart',ico:'💗', w:1, msg:'補回一顆愛心'},
+  {id:'lens', ico:'🔍', w:2, msg:'放大鏡！正確答案發光 6 秒'},
+  {id:'bomb', ico:'💣', w:3, msg:'切到炸彈，扣一顆愛心！'}
+];
+const JUICE={mango:['#FFB52E','#FFE36E'],apple:['#E12F45','#FFD9C9'],pear:['#B9D645','#F4F58A'],orange:['#FF8E1F','#FFD27A'],plum:['#7B4FD6','#E7B6FF'],melon:['#E4405F','#8EE08A']};
+const VW=()=>innerWidth||document.documentElement.clientWidth, VH=()=>innerHeight||document.documentElement.clientHeight;
+function fruitSize(){ return Math.max(110, Math.min(200, Math.min(VW(),VH())*.21)); }
+function freeX(fs){   // 挑一條上方沒有別的水果的直線，避免疊在一起
+  const W=VW(), lanes=Math.max(3,Math.floor(W/(fs*1.1))), lw=W/lanes;
+  const busy=new Set(fruits.filter(f=>!f.dead && f.y>VH()-fs*1.4).map(f=>Math.floor(f.x/lw)));
+  const open=[...Array(lanes).keys()].filter(k=>!busy.has(k));
+  const k=open.length?pick(open):R(0,lanes-1);
+  return Math.min(W-fs*.55, Math.max(fs*.55, (k+.5)*lw+(Math.random()-.5)*lw*.3));
+}
+function launch(el, extra){
+  const W=VW(), H=VH(), fs=fruitSize();
+  if(!W || !H) return null;
+  const life=SPEED[G.speed].life*(.85+Math.random()*.3);
+  el.style.setProperty('--fs',fs+'px');
+  // 從底部往上拋：飛到高點再掉回去，整趟飛行時間由「飛果速度」決定
+  const x=freeX(fs), y0=H+fs*.6, apex=Math.max(170+fs*.4, H*(.24+Math.random()*.2)), D=y0-apex, g=8*D/(life*life);
+  const tx=W*(.2+Math.random()*.6);
+  const f=Object.assign({el, x, y:y0, vx:(tx-x)/life, vy:-g*life/2, g,
+    rot:(Math.random()-.5)*16, ph:Math.random()*6.28, dead:false, fs}, extra);
+  sky.appendChild(el); fruits.push(f); place(f);
+  return f;
+}
+function spawn(){
+  const q=G.q;
+  const live=fruits.filter(f=>!f.dead && !f.item), onScreen=new Set(live.map(f=>f.v));
+  // 至少每 3 顆就有一顆正確答案；畫面上已經有正確答案時就先放錯的
+  const hasGood=live.some(f=>q.good.includes(f.v));
+  const wantGood = !hasGood && (G.sinceGood>=2 || Math.random()<.4);
+  let pool=(wantGood?q.good:q.bad).filter(v=>!onScreen.has(v));
+  if(!pool.length) pool=(wantGood?q.bad:q.good).filter(v=>!onScreen.has(v));
+  if(!pool.length) return;
+  const v=pick(pool), good=q.good.includes(v), kind=pick(FRUITS);
+  G.sinceGood = good ? 0 : G.sinceGood+1;
+  const el=document.createElement('div');
+  el.className='fruit'+(String(v).length>=3?' long':'');
+  el.innerHTML=`<i class="body"><svg viewBox="0 0 200 200"><use href="#f-${kind}"/></svg><span>${v}</span></i>`;
+  launch(el,{v,kind});
+}
+function spawnItem(force){
+  const pool=ITEMS.filter(it=>!(it.id==='heart' && G.hearts>=5));
+  const bag=[]; pool.forEach(it=>{ for(let k=0;k<it.w;k++) bag.push(it); });
+  const it=force?ITEMS.find(x=>x.id===force):pick(bag), el=document.createElement('div');
+  el.className='fruit item'+(it.id==='bomb'?' bomb':'');
+  el.innerHTML=`<i class="body"><b class="orb">${it.ico}</b></i>`;
+  launch(el,{item:it});
+}
+function place(f){ const bob=Math.sin(f.ph)*8; f.el.style.transform=`translate(${f.x}px,${f.y}px) translateX(${bob}px) rotate(${f.rot+Math.sin(f.ph*.7)*9}deg)`; }
+function popText(f, text, bad){
+  const p=document.createElement('div'); p.className='pop'+(bad?' bad':''); p.textContent=text;
+  p.style.left=f.x+'px'; p.style.top=f.y+'px'; sky.appendChild(p); setTimeout(()=>p.remove(),900);
+}
+
+/* 切開特效：兩半飛開＋果汁噴濺＋閃光 */
+const fx=$('#fx'), fctx=fx.getContext('2d');
+let parts=[], trail=[], rings=[];
+const calm=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+function burst(f, ang, colors){
+  if(f.kind){
+    for(const side of [0,1]){
+      const h=document.createElement('div'); h.className='half';
+      h.style.cssText=`--fs:${f.fs}px;left:${f.x}px;top:${f.y}px;transform:rotate(${ang+Math.PI/2}rad)`;
+      h.innerHTML=`<i class="${side?'r':'l'}"><svg viewBox="0 0 200 200"><use href="#f-${f.kind}"/></svg></i>`;
+      sky.appendChild(h); setTimeout(()=>h.remove(),650);
+    }
+  }
+  if(calm()) return;
+  const cols=colors||JUICE[f.kind]||['#FFD873','#fff'];
+  for(let k=0;k<34;k++){
+    const a=Math.random()*6.28, sp=180+Math.random()*520;
+    parts.push({x:f.x,y:f.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-140,r:4+Math.random()*9,c:pick(cols),life:.5+Math.random()*.5,t:0});
+  }
+  // 沿著刀痕方向再噴一道果汁
+  for(let k=0;k<14;k++){
+    const s=(Math.random()<.5?-1:1), sp=400+Math.random()*500, a=ang+(Math.random()-.5)*.35;
+    parts.push({x:f.x,y:f.y,vx:Math.cos(a)*sp*s,vy:Math.sin(a)*sp*s,r:3+Math.random()*6,c:cols[0],life:.4+Math.random()*.3,t:0});
+  }
+  rings.push({x:f.x,y:f.y,t:0,r:f.fs*.5,c:cols[1]||'#fff'});
+}
+function fitFx(){ const d=window.devicePixelRatio||1, W=Math.round(VW()*d), H=Math.round(VH()*d); if(W && H && (fx.width!==W || fx.height!==H)){ fx.width=W; fx.height=H; } fctx.setTransform(d,0,0,d,0,0); }
+function drawFx(dt){
+  fitFx(); fctx.clearRect(0,0,VW(),VH());
+  const now=performance.now();
+  trail=trail.filter(p=>now-p.t<170);
+  if(trail.length>1){   // 刀光
+    fctx.lineCap='round'; fctx.lineJoin='round';
+    for(let k=1;k<trail.length;k++){
+      if(trail[k].brk) continue;
+      const a=1-(now-trail[k].t)/170;
+      fctx.strokeStyle=`rgba(255,255,255,${a})`; fctx.lineWidth=3+a*13;
+      fctx.beginPath(); fctx.moveTo(trail[k-1].x,trail[k-1].y); fctx.lineTo(trail[k].x,trail[k].y); fctx.stroke();
+      fctx.strokeStyle=`rgba(255,216,115,${a*.8})`; fctx.lineWidth=1+a*5; fctx.stroke();
+    }
+  }
+  for(const r of rings){ r.t+=dt; const k=r.t/.35; fctx.strokeStyle=r.c; fctx.globalAlpha=Math.max(0,1-k); fctx.lineWidth=10*(1-k)+1; fctx.beginPath(); fctx.arc(r.x,r.y,r.r*(1+k*1.6),0,6.28); fctx.stroke(); }
+  rings=rings.filter(r=>r.t<.35);
+  for(const p of parts){ p.t+=dt; p.vy+=1500*dt; p.x+=p.vx*dt; p.y+=p.vy*dt; fctx.globalAlpha=Math.max(0,1-p.t/p.life); fctx.fillStyle=p.c; fctx.beginPath(); fctx.arc(p.x,p.y,p.r,0,6.28); fctx.fill(); }
+  fctx.globalAlpha=1;
+  parts=parts.filter(p=>p.t<p.life);
+}
+
+/* 切到水果或道具 */
+function loseHeart(){
+  G.hearts--; G.streak=0; drawHearts(G.hearts);
+  const st=$('#stage'); st.classList.remove('shake'); void st.offsetWidth; st.classList.add('shake');
+}
+function hitItem(f, ang){
+  f.dead=true; f.el.remove();
+  const it=f.item;
+  if(it.id==='bomb'){
+    burst(f, ang, ['#241D17','#FF8E1F','#FFD873']);
+    loseHeart(); G.wrong++; popText(f,'💥',true); say(it.msg,'bad');
+    beep(90,.4,'sawtooth',.09); beep(60,.5,'square',.06,.05);
+    $('#flash').classList.remove('go'); void $('#flash').offsetWidth; $('#flash').classList.add('go');
+    if(G.hearts<=0){ if(!G.pendingNext) G.log.push({text:G.q.text, ok:false, hint:G.q.hint}); end('hearts'); }
+  } else {
+    burst(f, ang, ['#FFD873','#FFFFFF','#9BD23C']);
+    if(it.id==='ice') G.iceT=6;
+    if(it.id==='star') G.starT=10;
+    if(it.id==='lens') G.lensT=6;
+    if(it.id==='clock'){ G.timeLeft+=10; G.total+=10; }
+    if(it.id==='heart'){ G.hearts=Math.min(5,G.hearts+1); drawHearts(); }
+    popText(f, it.ico); say(it.msg,'good');
+    [784,988,1175,1568].forEach((n,k)=>beep(n,.1,'sine',.06,k*.05));
+  }
+  hud();
+}
+function hit(f, ang){
+  if(!G || G.over || G.paused || f.dead || G.lock>0) return;
+  const q=G.q;
+  if(q.good.includes(f.v)){
+    f.dead=true; f.el.remove();
+    G.streak++; G.best=Math.max(G.best,G.streak); G.right++;
+    let pts=Math.round((10+Math.min(10,(G.streak-1)*2))*[1,1.5,2][G.diff]*[.8,.9,1,1.2,1.4][G.speed]);
+    if(G.starT>0) pts*=2;
+    G.score+=pts; popText(f,'+'+pts); burst(f, ang);
+    say('答對了！'+q.why(f.v),'good');
+    swish(); beep(660,.08); beep(880,.1,'triangle',.08,.07); if(G.streak%5===0) beep(1320,.18,'triangle',.07,.16);
+    q.got++;
+    if(q.need>1) q.good=q.good.filter(v=>v!==f.v);   // 同一個數字不會再出現，要找別的答案
+    if(G.boss){
+      G.boss.hp--;
+      const b=$('#boss'); b.classList.remove('hurt'); void b.offsetWidth; b.classList.add('hurt');
+      if(G.boss.hp<=0) endBoss(true);
+    } else if(q.got>=q.need){
+      G.log.push({text:q.text, ok:!G.qMissed, hint:q.hint});
+      G.done++; if(G.done%8===0 && G.timeLeft>25) G.pendingBoss=true;
+      // 其他水果退場（道具留著），稍停一下再出下一題
+      fruits.forEach(o=>{ if(!o.dead && !o.item){ o.dead=true; o.el.classList.add('fade'); setTimeout(()=>o.el.remove(),400); } });
+      G.lock=.9; G.pendingNext=true;
+    } else showQ();
+  } else {
+    f.dead=true; f.el.classList.add('miss'); setTimeout(()=>{ f.el.classList.add('fade'); setTimeout(()=>f.el.remove(),350); },500);
+    loseHeart(); G.wrong++; G.qMissed=true;
+    popText(f,'✗',true);
+    say(q.why(f.v),'bad');
+    beep(170,.22,'square',.06);
+    if(G.hearts<=0){ G.log.push({text:q.text, ok:false, hint:q.hint}); end('hearts'); }
+  }
+  hud();
+}
+/* 用手指劃：線段碰到水果就算切到。一刀最多切一顆答案水果，避免一劃扣好幾顆愛心 */
+let strokeP=null;
+function distSeg(px,py,x1,y1,x2,y2){ const dx=x2-x1, dy=y2-y1, l=dx*dx+dy*dy; let t=l?((px-x1)*dx+(py-y1)*dy)/l:0; t=Math.max(0,Math.min(1,t)); return Math.hypot(px-(x1+t*dx),py-(y1+t*dy)); }
+function slice(x1,y1,x2,y2){
+  if(!G || G.over || G.paused) return;
+  const ang=(x1===x2 && y1===y2) ? -Math.PI/4 : Math.atan2(y2-y1,x2-x1);
+  for(const f of fruits.slice()){
+    if(f.dead || distSeg(f.x,f.y,x1,y1,x2,y2)>f.fs*.43) continue;
+    if(f.item) hitItem(f, ang);
+    else if(strokeP && !strokeP.cut){ strokeP.cut=true; hit(f, ang); }
+  }
+}
+sky.addEventListener('pointerdown',e=>{
+  e.preventDefault(); try{ sky.setPointerCapture(e.pointerId); }catch(err){}
+  strokeP={x:e.clientX,y:e.clientY,cut:false};
+  trail.push({x:e.clientX,y:e.clientY,t:performance.now(),brk:true});
+  slice(e.clientX,e.clientY,e.clientX,e.clientY);
+});
+sky.addEventListener('pointermove',e=>{
+  if(!strokeP) return;
+  trail.push({x:e.clientX,y:e.clientY,t:performance.now()});
+  slice(strokeP.x,strokeP.y,e.clientX,e.clientY);
+  strokeP.x=e.clientX; strokeP.y=e.clientY;
+});
+const endStroke=()=>{ strokeP=null; };
+sky.addEventListener('pointerup',endStroke); sky.addEventListener('pointercancel',endStroke);
+function swish(){   // 刀聲
+  if(!soundOn) return;
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    const n=ac.sampleRate*.12, b=ac.createBuffer(1,n,ac.sampleRate), d=b.getChannelData(0);
+    for(let k=0;k<n;k++) d[k]=(Math.random()*2-1)*(1-k/n);
+    const s=ac.createBufferSource(), f=ac.createBiquadFilter(), g=ac.createGain();
+    s.buffer=b; f.type='bandpass'; f.frequency.value=2600; g.gain.value=.12;
+    s.connect(f).connect(g).connect(ac.destination); s.start();
+  }catch(e){}
+}
+
+/* ---------- 背景音樂：自己作曲、即時合成的輕快叢林小調，不用音樂檔 ---------- */
+const CHORD={C:48,G:43,Am:45,F:41};
+const TUNE=[['C',[72,0,76,79,0,76,72,0]],['G',[74,0,79,83,0,79,74,0]],['Am',[76,0,81,84,0,81,76,72]],['F',[77,76,74,72,0,69,72,0]],
+            ['C',[79,0,79,76,79,0,84,0]],['G',[83,0,79,74,79,0,83,0]],['F',[81,0,77,81,84,0,81,77]],['G',[79,0,74,79,0,83,86,0]]];
+let musicOn = store.get('fruit-music')!==false, mBus=null, mNoise=null, mStep=0, mNext=0;
+const hz=m=>440*Math.pow(2,(m-69)/12);
+function musicSetup(){
+  if(mBus || !musicOn) return;
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    if(ac.state==='suspended') ac.resume();
+    mBus=ac.createGain(); mBus.gain.value=0; mBus.connect(ac.destination);
+    mNoise=ac.createBuffer(1,ac.sampleRate*.1,ac.sampleRate);
+    const d=mNoise.getChannelData(0); for(let k=0;k<d.length;k++) d[k]=Math.random()*2-1;
+  }catch(e){}
+}
+function tone(f,t,d,type,vol,slideTo){
+  const o=ac.createOscillator(), g=ac.createGain();
+  o.type=type; o.frequency.setValueAtTime(f,t); if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo,t+d);
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.008); g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g).connect(mBus); o.start(t); o.stop(t+d+.05);
+}
+function hat(t,vol,freq){
+  const s=ac.createBufferSource(), f=ac.createBiquadFilter(), g=ac.createGain();
+  s.buffer=mNoise; f.type='highpass'; f.frequency.value=freq;
+  g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0001,t+.07);
+  s.connect(f).connect(g).connect(mBus); s.start(t); s.stop(t+.09);
+}
+function playStep(i,t,ed){
+  const [ch,mel]=TUNE[(i/8|0)%TUNE.length], pos=i%8, root=CHORD[ch];
+  if(pos===0 || pos===4) tone(150,t,.16,'sine',.5,45);                 // 大鼓
+  if(pos===2 || pos===6) hat(t,.16,1800);                              // 拍手
+  hat(t, pos%2 ? .07 : .03, 7000);                                     // 沙鈴
+  if(pos===0 || pos===3 || pos===4) tone(hz(root),t,ed*1.6,'triangle',.3);
+  if(pos===6) tone(hz(root+7),t,ed*1.4,'triangle',.24);
+  if(mel[pos]){ tone(hz(mel[pos]),t,ed*1.5,'sine',.2); tone(hz(mel[pos]+12),t,ed*.5,'triangle',.06); }   // 木琴
+}
+function musicWanted(){ return musicOn && G && !G.over && !G.paused && !$('#stage').hidden && !document.hidden; }
+setInterval(()=>{
+  if(!mBus) return;
+  const want=musicWanted();
+  mBus.gain.setTargetAtTime(want?.5:0, ac.currentTime, want?.3:.12);
+  if(!want){ mNext=0; return; }
+  const ed = G.timeLeft<15 ? .185 : G.iceT>0 ? .3 : G.boss ? .195 : .225;   // 最後 15 秒變快；冰凍時變慢
+  if(mNext<ac.currentTime) mNext=ac.currentTime+.06;
+  while(mNext<ac.currentTime+.18){ playStep(mStep,mNext,ed); mNext+=ed; mStep=(mStep+1)%(TUNE.length*8); }
+},40);
+document.addEventListener('pointerdown',musicSetup);
+
+/* ---------- 主迴圈 ---------- */
+function frame(now){
+  const dt=Math.min(.05,(now-lastFrame)/1000||0); lastFrame=now;
+  update(dt); drawFx(dt);
+  requestAnimationFrame(frame);
+}
+function update(dt){
+  if(G && !G.over && !G.paused){
+    G.timeLeft-=dt;
+    G.iceT=Math.max(0,G.iceT-dt); G.starT=Math.max(0,G.starT-dt); G.lensT=Math.max(0,G.lensT-dt);
+    const slow=G.iceT>0?.4:1;
+    if(G.lock>0){ G.lock-=dt; if(G.lock<=0 && G.pendingNext){ G.pendingNext=false; if(G.pendingBoss){ G.pendingBoss=false; startBoss(); } else nextQ(); } }
+    else {
+      G.spawnIn-=dt*slow;
+      const maxOn=[4,4,5,5,6][G.speed]+(G.boss?1:0);
+      if(G.spawnIn<=0 && fruits.filter(f=>!f.dead && !f.item).length<maxOn){ spawn(); G.spawnIn=SPEED[G.speed].gap*(.8+Math.random()*.4); }
+      G.itemIn-=dt;
+      if(G.itemIn<=0){ spawnItem(); G.itemIn=9+Math.random()*6; }
+      if(G.boss){
+        G.boss.t-=dt; G.boss.bombIn-=dt;
+        if(G.boss.bombIn<=0){ spawnItem('bomb'); G.boss.bombIn=4.5+Math.random()*3; }
+        if(G.boss.t<=0) endBoss(false);
+      }
+    }
+    const W=VW(), H=VH(), glow=G.lensT>0;
+    for(const f of fruits){
+      if(f.dead) continue;
+      f.vy+=f.g*dt*slow; f.x+=f.vx*dt*slow; f.y+=f.vy*dt*slow; f.ph+=dt*2.2;
+      if(f.x<f.fs*.5 || f.x>W-f.fs*.5) f.vx*=-1;
+      place(f);
+      if(!f.item) f.el.classList.toggle('glow', glow && G.q.good.includes(f.v));
+      if(f.y>H+f.fs*.7 && f.vy>0){ f.dead=true; f.el.remove(); }
+    }
+    fruits=fruits.filter(f=>!f.dead || f.el.isConnected);
+    if(G.timeLeft<=0){ G.timeLeft=0; if(G.q && !G.pendingNext) G.log.push({text:G.q.text, ok:false, hint:G.q.hint, unfinished:true}); end('time'); }
+    hud();
+  }
+}
+
+/* ---------- 流程 ---------- */
+function start(){
+  store.set('fruit-cfg',cfg);
+  $('#menu').hidden=true; $('#result').hidden=true; $('#pause').hidden=true; $('#stage').hidden=false;
+  $('#why').className='why';
+  newGame(); beep(523,.1); beep(659,.1,'triangle',.08,.1); beep(784,.16,'triangle',.08,.2);
+}
+function bestKey(){ return `fruit-best-${cfg.game}-${cfg.diff}`; }
+function end(reason){
+  if(G.over) return; G.over=true;
+  fruits.forEach(f=>f.el.classList.add('fade'));
+  const taps=G.right+G.wrong, acc=taps?Math.round(G.right/taps*100):0;
+  const old=store.get(bestKey())||0, isBest=G.score>old && G.score>0;
+  if(isBest) store.set(bestKey(),G.score);
+  $('#resTitle').textContent = reason==='hearts' ? '愛心用完了！' : '時間到！';
+  $('#boss').hidden=true;
+  const entry={id:Date.now()+'-'+Math.random().toString(36).slice(2,6), name:G.name, game:G.game, diff:G.diff, score:G.score, right:G.right, acc, kills:G.kills,
+    date:new Date().toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'})};
+  let rank=0;
+  if(G.score>0){
+    const all=loadBoard(); all.push(entry);
+    const keep=[]; for(const g of ['fm','common']) for(let d=0;d<3;d++) keep.push(...all.filter(e=>e.game===g && e.diff===d).sort((a,b)=>b.score-a.score).slice(0,30));
+    store.set('fruit-board',keep); lastEntry=entry.id;
+    rank=boardFor(G.game,G.diff).findIndex(e=>e.id===entry.id)+1;
+  }
+  $('#resSub').textContent = (rank===1 ? `${G.name}，你是這個難度的第 1 名！` : rank ? `${G.name}，你在這個難度排第 ${rank} 名。` : '這次沒有得分，不列入排行榜。')
+    + (G.kills ? `　打倒果王 ${G.kills} 次。` : '');
+  $('#resScore').textContent=G.score;
+  $('#resRight').textContent=G.right; $('#resWrong').textContent=G.wrong; $('#resAcc').textContent=acc+'%'; $('#resStreak').textContent=G.best;
+  const missed=G.log.filter(l=>!l.ok);
+  $('#review').innerHTML = missed.length
+    ? `<h3>再看一次這些題目</h3><ul>${missed.slice(-8).map(l=>`<li>${l.text.replace(/<\/?(b|em)>/g,'')}　<b>${l.hint}</b></li>`).join('')}</ul>`
+    : `<h3>${G.right? '每一題都是一次就答對，太厲害了！':'這次還沒答對題目，把速度調慢一點再試試看。'}</h3>`;
+  setTimeout(()=>{ $('#result').hidden=false; if(reason==='time') [523,659,784,1047].forEach((f,k)=>beep(f,.16,'triangle',.07,k*.11)); else { beep(300,.2,'sawtooth',.05); beep(200,.3,'sawtooth',.05,.18); } }, 600);
+}
+/* ---------- 排行榜（存在這台電腦的瀏覽器裡） ---------- */
+let lastEntry=null, bGame='fm', bDiff=0;
+function playerName(){ const v=($('#pname').value||'').trim(); return v || '神祕忍者'; }
+function loadBoard(){ const b=store.get('fruit-board'); return Array.isArray(b)?b:[]; }
+function boardFor(g,d){ return loadBoard().filter(e=>e.game===g && e.diff===d).sort((a,b)=>b.score-a.score); }
+const escH=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function renderBoard(){
+  $$('#bGame button').forEach(b=>b.setAttribute('aria-checked', b.dataset.v===bGame));
+  $$('#bDiff button').forEach(b=>b.setAttribute('aria-checked', +b.dataset.v===bDiff));
+  const list=boardFor(bGame,bDiff).slice(0,10);
+  $('#boardBody').innerHTML = list.length
+    ? list.map((e,k)=>`<tr class="${e.id===lastEntry?'me':''}"><td><span class="medal m${k+1}">${k+1}</span></td><td class="nm">${escH(e.name)}</td><td class="sc">${e.score}</td><td>${e.right}</td><td>${e.acc}%</td><td>${e.kills||0}</td><td>${e.date}</td></tr>`).join('')
+    : '<tr><td colspan="7" class="empty">這個難度還沒有人上榜，快來搶第一名！</td></tr>';
+}
+function openBoard(g,d){ bGame=g; bDiff=d; renderBoard(); $('#board').hidden=false; }
+function setPause(p){
+  if(!G || G.over) return;
+  G.paused=p; $('#pause').hidden=!p;
+}
+function toMenu(){
+  if(G) G.over=true;
+  $('#boss').hidden=true; $('#board').hidden=true;
+  fruits.forEach(f=>f.el.remove()); fruits=[];
+  $('#stage').hidden=true; $('#result').hidden=true; $('#pause').hidden=true; $('#menu').hidden=false; syncMenu();
+}
+function syncMenu(){
+  $$('.game').forEach(b=>b.setAttribute('aria-checked', b.dataset.game===cfg.game));
+  $$('.seg').forEach(seg=>{ const k=seg.dataset.opt; seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-checked', +b.dataset.v===cfg[k])); });
+  $('#diffHint').textContent=DIFF_HINT[cfg.game][cfg.diff];
+  $('#speedHint').textContent=SPEED[cfg.speed].hint;
+  const b=store.get(bestKey());
+  $('#bestLine').innerHTML = b ? `這個難度的最高分 <b>${b}</b>` : '';
+  $('#soundBtn').textContent=soundOn?'音效開':'音效關'; $('#soundBtn').setAttribute('aria-pressed',soundOn);
+  $('#musicBtn').textContent=musicOn?'音樂開':'音樂關'; $('#musicBtn').setAttribute('aria-pressed',musicOn);
+}
+
+/* ---------- 事件 ---------- */
+$('#games').addEventListener('click',e=>{ const b=e.target.closest('.game'); if(b){ cfg.game=b.dataset.game; syncMenu(); beep(520,.04,'sine',.04); } });
+$$('.seg').forEach(seg=>seg.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ cfg[seg.dataset.opt]=+b.dataset.v; syncMenu(); beep(520,.04,'sine',.04); } }));
+$('#startBtn').onclick=start; $('#againBtn').onclick=start;
+$('#boardBtn').onclick=()=>openBoard(cfg.game,cfg.diff);
+$('#resBoardBtn').onclick=()=>openBoard(G.game,G.diff);
+$('#boardClose').onclick=()=>{ $('#board').hidden=true; };
+$('#bGame').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ bGame=b.dataset.v; renderBoard(); } });
+$('#bDiff').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ bDiff=+b.dataset.v; renderBoard(); } });
+$('#boardClear').onclick=e=>{   // 連按兩次才清除，避免誤按
+  const b=e.currentTarget;
+  if(!b.classList.contains('armed')){ b.classList.add('armed'); b.textContent='再按一次確認清除'; setTimeout(()=>{ b.classList.remove('armed'); b.textContent='清除這個難度的紀錄'; },3000); return; }
+  store.set('fruit-board', loadBoard().filter(x=>!(x.game===bGame && x.diff===bDiff))); b.classList.remove('armed'); b.textContent='清除這個難度的紀錄'; renderBoard();
+};
+$('#pname').value=store.get('fruit-name')||'';
+$('#pname').addEventListener('input',()=>store.set('fruit-name',$('#pname').value.trim()));
+$('#pname').addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Enter') start(); });
+$('#menuBtn').onclick=toMenu; $('#quitBtn').onclick=toMenu;
+$('#pauseBtn').onclick=()=>setPause(true); $('#resumeBtn').onclick=()=>setPause(false);
+$('#soundBtn').onclick=()=>{ soundOn=!soundOn; store.set('fruit-sound',soundOn); syncMenu(); };
+$('#musicBtn').onclick=()=>{ musicOn=!musicOn; store.set('fruit-music',musicOn); musicSetup(); syncMenu(); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' || e.key.toLowerCase()==='p'){ if(G && !G.over && !$('#stage').hidden) setPause(!G.paused); } });
+document.addEventListener('visibilitychange',()=>{ if(document.hidden && G && !G.over && !$('#stage').hidden) setPause(true); });
+
+(function(){ let d=''; const N=22; for(let k=0;k<N*2;k++){ const a=k/(N*2)*6.283-1.57, r=k%2?84:102, x=120+Math.cos(a)*r*1.02, y=146+Math.sin(a)*r*.98; d+=(k?'L':'M')+x.toFixed(1)+' '+y.toFixed(1); } $('#bossBody').setAttribute('d',d+'Z'); })();
+syncMenu();
+requestAnimationFrame(frame);
+window.__fruit={makeQ, Q_FM, Q_CM, MIX, update, bossQ, state:()=>G, startBoss};   // 給測試用
+})();
+</script>
+</body>
+</html>
