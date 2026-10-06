@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="因數與倍數、公因數與公倍數的切水果遊戲，有道具、果王 Boss 與排行榜。">
+<meta name="description" content="因數與倍數、公因數與公倍數的切水果遊戲，有角色、道具、魔王圖鑑與排行榜。">
 <meta name="theme-color" content="#17404F">
 <meta property="og:type" content="website">
 <meta property="og:title" content="飛果大挑戰">
-<meta property="og:description" content="因數與倍數、公因數與公倍數的切水果遊戲，有道具、果王 Boss 與排行榜。">
+<meta property="og:description" content="因數與倍數、公因數與公倍數的切水果遊戲，有角色、道具、魔王圖鑑與排行榜。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%f0%9f%a5%ad%3C/text%3E%3C/svg%3E">
 <title>飛果大挑戰</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -234,6 +234,41 @@ tbody tr.me{background:var(--sun)}
 .m1{background:var(--sun);border:2px solid var(--ink)}.m2{background:#D9E2EC;border:2px solid var(--ink)}.m3{background:#E4A267;border:2px solid var(--ink)}
 .empty{padding:22px;color:var(--muted)}
 .btn.armed{background:var(--berry);color:var(--paper)}
+#startBtn{flex:1 0 100%}
+
+/* 角色、圖鑑 */
+.who{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:clamp(12px,2vw,24px);align-items:start}
+.heroes{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.heropick{border:3px solid var(--ink);border-radius:14px;background:var(--paper2);box-shadow:0 4px 0 var(--ink);padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;transition:transform .08s,box-shadow .08s}
+.heropick span{font-size:clamp(26px,3vw,40px);line-height:1.1}
+.heropick b{font-size:clamp(11px,1.05vw,14px);white-space:nowrap}
+.heropick[aria-checked="true"]{background:var(--sun);transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.hero{position:absolute;left:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:4;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:4px}
+.hero span{display:grid;place-items:center;width:clamp(64px,8vw,112px);height:clamp(64px,8vw,112px);border-radius:50%;font-size:clamp(38px,5vw,70px);line-height:1;
+  background:var(--paper);border:5px solid var(--ink);box-shadow:0 6px 0 var(--ink)}
+.hero b{font-size:clamp(12px,1.2vw,16px);color:var(--paper);background:var(--ink);border-radius:999px;padding:1px 10px}
+.hero.yay span{animation:heroYay .5s}
+.hero.ouch span{animation:heroOuch .5s}
+@keyframes heroYay{35%{transform:translateY(-26px) rotate(-10deg) scale(1.12)}70%{transform:translateY(0) rotate(6deg)}}
+@keyframes heroOuch{20%{transform:translateX(-10px) rotate(-12deg);background:var(--berry)}50%{transform:translateX(10px) rotate(10deg)}80%{transform:translateX(-5px)}}
+.dexgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.dexcard{border:4px solid var(--ink);border-radius:18px;background:var(--paper2);padding:10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
+.dexcard svg{width:clamp(80px,11vw,140px);height:auto}
+.dexcard b{font-size:clamp(17px,1.9vw,24px)}
+.dexcard small{font-size:clamp(12px,1.2vw,15px);color:var(--muted);min-height:2.6em}
+.dexcard span{font-family:var(--f-num),var(--f-zh);font-size:clamp(13px,1.3vw,16px);background:var(--sun);border:2px solid var(--ink);border-radius:999px;padding:0 10px}
+.dexcard.lock svg{filter:brightness(0) opacity(.35)}
+.dexcard.lock span{background:var(--paper);color:var(--muted)}
+@media (max-width:760px){ .who{grid-template-columns:1fr} .heroes{grid-template-columns:repeat(3,1fr)} .dexgrid{grid-template-columns:repeat(2,1fr)} .hero b{display:none} }
+@media (prefers-reduced-motion:reduce){ .hero.yay span,.hero.ouch span{animation:none} }
+
+.heropick.lock{background:var(--paper);opacity:.75}
+.heropick.lock span{filter:grayscale(1) brightness(.5)}
+.heropick.lock b{white-space:normal;font-size:clamp(10px,.95vw,12px);line-height:1.15;color:var(--muted)}
+.fog{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity .5s;
+  background:radial-gradient(circle at 30% 40%,rgba(255,255,255,.95),transparent 42%),radial-gradient(circle at 72% 55%,rgba(255,255,255,.95),transparent 45%),radial-gradient(circle at 50% 80%,rgba(255,255,255,.9),transparent 40%),rgba(230,236,240,.55)}
+.fog.on{opacity:1}
+.legend b{font-size:.95em}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -243,6 +278,7 @@ tbody tr.me{background:var(--sun)}
     <radialGradient id="g-pear" cx=".4" cy=".3" r=".9"><stop offset="0" stop-color="#F4F58A"/><stop offset=".6" stop-color="#B9D645"/><stop offset="1" stop-color="#6FA62E"/></radialGradient>
     <radialGradient id="g-orange" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#FFD27A"/><stop offset=".6" stop-color="#FF8E1F"/><stop offset="1" stop-color="#D9601A"/></radialGradient>
     <radialGradient id="g-plum" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#C49BFF"/><stop offset=".6" stop-color="#7B4FD6"/><stop offset="1" stop-color="#49299A"/></radialGradient>
+    <radialGradient id="g-coco" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#C99A6B"/><stop offset=".6" stop-color="#8A5A34"/><stop offset="1" stop-color="#553317"/></radialGradient>
     <radialGradient id="g-melon" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#8EE08A"/><stop offset=".6" stop-color="#2FA35A"/><stop offset="1" stop-color="#176B3C"/></radialGradient>
 
     <symbol id="f-mango" viewBox="0 0 200 200">
@@ -300,18 +336,11 @@ tbody tr.me{background:var(--sun)}
 
 <!-- ===== 遊戲畫面 ===== -->
 <div class="stage" id="stage" hidden>
-  <div class="boss" id="boss" hidden aria-hidden="true">
-    <svg viewBox="0 0 240 250">
-      <path d="M70 52l14-34 22 26 14-32 14 32 22-26 14 34z" fill="#FFD873" stroke="#241D17" stroke-width="6" stroke-linejoin="round"/>
-      <path id="bossBody" fill="url(#g-pear)" stroke="#241D17" stroke-width="7" stroke-linejoin="round"/>
-      <path d="M62 112l44 16M178 112l-44 16" stroke="#241D17" stroke-width="9" stroke-linecap="round"/>
-      <ellipse cx="86" cy="140" rx="17" ry="20" fill="#fff" stroke="#241D17" stroke-width="5"/><ellipse cx="154" cy="140" rx="17" ry="20" fill="#fff" stroke="#241D17" stroke-width="5"/>
-      <circle cx="90" cy="144" r="8" fill="#241D17"/><circle cx="150" cy="144" r="8" fill="#241D17"/>
-      <path d="M78 190l14-12 14 12 14-12 14 12 14-12 14 12" fill="none" stroke="#241D17" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </div>
+  <div class="boss" id="boss" hidden aria-hidden="true"></div>
+  <div class="hero" id="hero" aria-hidden="true"></div>
   <div class="sky" id="sky"></div>
   <canvas class="fx" id="fx"></canvas>
+  <div class="fog" id="fog"></div>
   <div class="flash" id="flash"></div>
   <div class="hud">
     <div>
@@ -338,12 +367,19 @@ tbody tr.me{background:var(--sun)}
   <div class="card">
     <div>
       <h1>飛果大挑戰</h1>
-      <p class="lead">看清楚木牌上的題目，水果會從下面拋上來。用手指劃過寫著正確答案的水果，把它切開！有些題目要切好幾顆，每答對 8 題果王就會出現。</p>
+      <p class="lead">看清楚木牌上的題目，水果會從下面拋上來。用手指劃過寫著正確答案的水果，把它切開！有些題目要切好幾顆。每答對 8 題會有一隻魔王出現，打倒牠可以解鎖圖鑑；之後遊戲繼續，直到時間結束。</p>
     </div>
 
-    <div class="grp">
-      <label class="lab" for="pname">你的名字（會登記在排行榜）</label>
-      <input id="pname" type="text" maxlength="10" placeholder="例如：5年3班 小明" autocomplete="off">
+    <div class="who">
+      <div class="grp">
+        <label class="lab" for="pname">你的名字（會登記在排行榜）</label>
+        <input id="pname" type="text" maxlength="10" placeholder="例如：5年3班 小明" autocomplete="off">
+      </div>
+      <div class="grp">
+        <span class="lab">選一個角色</span>
+        <div class="heroes" id="heroes" role="radiogroup" aria-label="角色"></div>
+        <span class="hint" id="heroHint"></span>
+      </div>
     </div>
 
     <div class="grp">
@@ -393,10 +429,11 @@ tbody tr.me{background:var(--sun)}
       </div>
     </div>
 
-    <p class="legend"><b>會掉下來的道具</b><span>❄️ 水果變慢</span><span>⭐ 分數加倍</span><span>⏰ 多 10 秒</span><span>💗 補一顆愛心</span><span>🔍 正確答案發光</span><span class="no">💣 炸彈不要切！</span></p>
+    <p class="legend"><b>好道具</b><span>❄️ 變慢</span><span>⭐ 雙倍</span><span>⏰ 加時</span><span>💗 愛心</span><span>🔍 找答案</span><span>🌈 清掉錯的</span><span>🧲 幫你切</span><span>🪙 加分</span><span>🛡️ 護盾</span><b style="margin-left:8px">陷阱不要切</b><span class="no">💣 扣愛心</span><span class="no">🧨 扣時間</span><span class="no">🌫️ 起霧</span><span class="no">🍄 扣分</span><span class="no">🌪️ 加速</span></p>
     <div class="row">
       <button type="button" class="btn go" id="startBtn">開始摘果</button>
       <button type="button" class="btn" id="boardBtn">排行榜</button>
+      <button type="button" class="btn" id="dexBtn">魔王圖鑑</button>
       <button type="button" class="btn" id="musicBtn" aria-pressed="true">音樂開</button>
       <button type="button" class="btn" id="soundBtn" aria-pressed="true">音效開</button>
       <span class="best" id="bestLine"></span>
@@ -436,8 +473,22 @@ tbody tr.me{background:var(--sun)}
     <div class="row">
       <button type="button" class="btn go" id="againBtn">再玩一次</button>
       <button type="button" class="btn" id="resBoardBtn">排行榜</button>
+      <button type="button" class="btn" id="resDexBtn">魔王圖鑑</button>
       <button type="button" class="btn" id="menuBtn">回選單</button>
     </div>
+  </div>
+</div>
+
+<!-- ===== 魔王圖鑑 ===== -->
+<div class="veil top" id="dex" hidden>
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <h2>魔王圖鑑</h2>
+      <button type="button" class="btn" id="dexClose">關閉</button>
+    </div>
+    <p class="lead" id="dexWho" style="margin:0"></p>
+    <div class="dexgrid" id="dexGrid"></div>
+    <span class="hint">每答對 8 題會隨機出現一隻魔王。圖鑑跟著名字記錄，存在這台電腦的瀏覽器裡。</span>
   </div>
 </div>
 
@@ -454,7 +505,7 @@ tbody tr.me{background:var(--sun)}
     </div>
     <div class="tablewrap">
       <table>
-        <thead><tr><th>名次</th><th>名字</th><th>分數</th><th>答對</th><th>正確率</th><th>打倒果王</th><th>日期</th></tr></thead>
+        <thead><tr><th>名次</th><th>名字</th><th>分數</th><th>答對</th><th>正確率</th><th>打倒魔王</th><th>日期</th></tr></thead>
         <tbody id="boardBody"></tbody>
       </table>
     </div>
@@ -611,7 +662,7 @@ const DIFF_HINT={ fm:['數字比較小：找倍數、找因數、2、5、10 的�
 const SPEED=[ {life:13, gap:2.2, hint:'水果慢慢飄，有很多時間想'}, {life:10, gap:1.8, hint:'比較慢，適合剛開始練習'},
               {life:7.5, gap:1.35, hint:'一般速度'}, {life:5.5, gap:1.05, hint:'要算得快一點'}, {life:4, gap:.8, hint:'高手限定，眼睛要跟上！'} ];
 const FRUITS=['mango','apple','pear','orange','plum','melon'];
-const cfg=Object.assign({game:'fm', diff:0, speed:2, mins:3}, store.get('fruit-cfg')||{});
+const cfg=Object.assign({game:'fm', diff:0, speed:2, mins:3, hero:'ninja'}, store.get('fruit-cfg')||{});
 let soundOn = store.get('fruit-sound')!==false;
 
 /* ---------- 音效 ---------- */
@@ -634,7 +685,8 @@ let G=null, fruits=[], lastFrame=0, whyT=null;
 function newGame(){
   G={ game:cfg.game, diff:cfg.diff, speed:cfg.speed, timeLeft:cfg.mins*60, total:cfg.mins*60,
       hearts:5, score:0, right:0, wrong:0, streak:0, best:0, q:null, qMissed:false, qNo:0,
-      spawnIn:.4, itemIn:7, iceT:0, starT:0, lensT:0, sinceGood:0, lock:0, paused:false, over:false, log:[], done:0, boss:null, kills:0, pendingBoss:false, name:playerName() };
+      spawnIn:.4, itemIn:6, iceT:0, starT:0, lensT:0, fogT:0, windT:0, shield:false, sinceGood:0, lock:0, paused:false, over:false, log:[], done:0, boss:null, kills:0, pendingBoss:false, name:playerName(), newDex:[], had:unlockedIds(playerName()) };
+  const h=hero(); $('#hero').innerHTML=`<span>${h.ico}</span><b>${h.name}</b>`; $('#hero').className='hero';
   fruits.forEach(f=>f.el.remove()); fruits=[];
   $$('.pop,.half').forEach(e=>e.remove()); parts=[]; rings=[]; trail=[]; $('#boss').hidden=true;
   drawHearts(); nextQ(); hud();
@@ -648,14 +700,14 @@ function hud(){
   $('#time').textContent=Math.floor(t/60)+':'+String(t%60).padStart(2,'0');
   $('#timeBox').classList.toggle('low', t<=15);
   const bb=$('#bossBar'); bb.hidden=!G.boss;
-  if(G.boss){ $('#bossHp').style.width=(G.boss.hp/G.boss.max*100)+'%'; $('#bossT').textContent=`果王 ${G.boss.hp}／${G.boss.max}　剩 ${Math.ceil(G.boss.t)} 秒`; }
+  if(G.boss){ $('#bossHp').style.width=(G.boss.hp/G.boss.max*100)+'%'; $('#bossT').textContent=`${G.boss.def.name} ${G.boss.hp}／${G.boss.max}　剩 ${Math.ceil(G.boss.t)} 秒`; }
   const s=$('#streak'); s.hidden=G.streak<3; s.textContent=`連續答對 ${G.streak} 題`;
-  $('#buffs').innerHTML=[[G.iceT,'❄️ 變慢'],[G.starT,'⭐ 雙倍'],[G.lensT,'🔍 找答案']].filter(b=>b[0]>0).map(b=>`<span>${b[1]} ${Math.ceil(b[0])}</span>`).join('');
+  $('#buffs').innerHTML=(G.shield?'<span>🛡️ 護盾</span>':'')+[[G.iceT,'❄️ 變慢'],[G.starT,'⭐ 雙倍'],[G.lensT,'🔍 找答案'],[G.fogT,'🌫️ 起霧'],[G.windT,'🌪️ 旋風']].filter(b=>b[0]>0).map(b=>`<span>${b[1]} ${Math.ceil(b[0])}</span>`).join('');
 }
 function showQ(){
   const q=G.q, left=q.need-q.got;
-  $('#q').innerHTML = (G.boss?'<span class="weak">果王的弱點</span>':'') + (q.need>1 ? q.text.replace('哪一個數','哪些數').replace('哪一個','哪些') : q.text);
-  $('#count').textContent = G.boss ? `果王來襲！` : q.need>1 ? `第 ${G.qNo} 題｜要切 ${q.need} 顆，還差 ${left} 顆` : `第 ${G.qNo} 題`;
+  $('#q').innerHTML = (G.boss?`<span class="weak">${G.boss.def.name}的弱點</span>`:'') + (q.need>1 ? q.text.replace('哪一個數','哪些數').replace('哪一個','哪些') : q.text);
+  $('#count').textContent = G.boss ? `${G.boss.def.name}來襲！` : q.need>1 ? `第 ${G.qNo} 題｜要切 ${q.need} 顆，還差 ${left} 顆` : `第 ${G.qNo} 題`;
   $('#count').classList.toggle('multi', q.need>1 && !G.boss);
 }
 function nextQ(){
@@ -665,9 +717,58 @@ function nextQ(){
   G.q=q; G.qMissed=false; G.qNo++; G.sinceGood=1; G.spawnIn=.25;
   showQ();
 }
-/* ---------- Boss：果王 ---------- */
-function bossQ(){
-  const d=G.diff, hp=[5,6,8][d];
+/* ---------- 角色（只影響外觀和刀光顏色，不影響分數） ---------- */
+const HEROES=[
+  {id:'ninja', ico:'🥷', name:'水果忍者',   blade:['255,255,255','255,216,115'], need:'', ok:()=>true},
+  {id:'chef',  ico:'🧑‍🍳', name:'快刀廚師',   blade:['255,244,218','255,142,31'],  need:'累積答對 20 題', ok:p=>p.right>=20},
+  {id:'cat',   ico:'🐱', name:'貓咪劍士',   blade:['255,230,240','255,110,160'], need:'打倒 1 隻魔王', ok:(p,d)=>d>=1},
+  {id:'robot', ico:'🤖', name:'雷射機器人', blade:['220,250,255','60,200,255'],  need:'單局拿到 600 分', ok:p=>p.best>=600},
+  {id:'wizard',ico:'🧙', name:'數學魔法師', blade:['240,225,255','160,110,255'], need:'累積答對 100 題', ok:p=>p.right>=100},
+  {id:'hero',  ico:'🦸', name:'超級英雄',   blade:['255,240,200','228,64,95'],   need:'圖鑑解鎖 4 隻魔王', ok:(p,d)=>d>=4}
+];
+function profAll(){ const d=store.get('fruit-prof'); return (d && typeof d==='object')?d:{}; }
+function profOf(name){ return Object.assign({right:0,best:0}, profAll()[name]||{}); }
+function heroOK(h,name){ return h.ok(profOf(name), Object.keys(dexOf(name)).length); }
+function unlockedIds(name){ return HEROES.filter(h=>heroOK(h,name)).map(h=>h.id); }
+const hero=()=>HEROES.find(h=>h.id===cfg.hero)||HEROES[0];
+function heroReact(kind){ const h=$('#hero'); h.classList.remove('yay','ouch'); void h.offsetWidth; h.classList.add(kind); }
+
+/* ---------- 魔王：六隻各有特色，隨機出現 ---------- */
+function spiky(N,r1,r2){ let d=''; for(let k=0;k<N*2;k++){ const a=k/(N*2)*6.283-1.57, r=k%2?r2:r1; d+=(k?'L':'M')+(120+Math.cos(a)*r).toFixed(1)+' '+(146+Math.sin(a)*r).toFixed(1); } return d+'Z'; }
+function blob(rx,ry){ return `M${120-rx} 146a${rx} ${ry} 0 1 0 ${rx*2} 0a${rx} ${ry} 0 1 0 ${-rx*2} 0Z`; }
+const CROWN='<path d="M70 52l14-34 22 26 14-32 14 32 22-26 14 34z" fill="#FFD873" stroke="#241D17" stroke-width="6" stroke-linejoin="round"/>';
+const LEAVES='<path d="M120 60c-10-30-34-44-56-40 8 22 26 36 56 40zm0 0c0-34 14-52 34-58 6 24-6 46-34 58zm0 0c14-26 40-34 62-26-12 20-32 30-62 26z" fill="#2FA35A" stroke="#241D17" stroke-width="6" stroke-linejoin="round"/>';
+const FACE='<path d="M62 112l44 16M178 112l-44 16" stroke="#241D17" stroke-width="9" stroke-linecap="round"/><ellipse cx="86" cy="140" rx="17" ry="20" fill="#fff" stroke="#241D17" stroke-width="5"/><ellipse cx="154" cy="140" rx="17" ry="20" fill="#fff" stroke="#241D17" stroke-width="5"/><circle cx="90" cy="144" r="8" fill="#241D17"/><circle cx="150" cy="144" r="8" fill="#241D17"/><path d="M78 190l14-12 14 12 14-12 14 12 14-12 14 12" fill="none" stroke="#241D17" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>';
+const BOSSES=[
+  {id:'durian', name:'榴槤王',   fill:'url(#g-pear)',  body:spiky(22,102,84), hat:CROWN, deco:'', trait:'渾身是刺，最標準的對手', hp:0, t:0,  bomb:5,   spd:1,   bonus:1},
+  {id:'melon',  name:'西瓜將軍', fill:'url(#g-melon)', body:blob(104,92),     hat:CROWN, deco:'<path d="M58 86c-14 36-14 84 0 120M94 62c-12 50-12 118 0 168M146 62c12 50 12 118 0 168M182 86c14 36 14 84 0 120" fill="none" stroke="#0E3A2C" stroke-opacity=".45" stroke-width="8" stroke-linecap="round"/>', trait:'皮很厚，要多切 2 顆', hp:2, t:8, bomb:5.5, spd:1, bonus:1.2},
+  {id:'pine',   name:'鳳梨博士', fill:'url(#g-orange)',body:blob(86,98),      hat:LEAVES,deco:'<path d="M52 110l136 72M52 146l110 76M78 78l112 68M188 110L52 182M188 146L78 222M162 78L50 146" fill="none" stroke="#9A4A12" stroke-opacity=".4" stroke-width="5"/>', trait:'炸彈丟得特別快', hp:0, t:0, bomb:2.8, spd:1, bonus:1.3},
+  {id:'chili',  name:'辣椒魔人', fill:'url(#g-apple)', body:spiky(9,106,86),  hat:LEAVES,deco:'', trait:'脾氣很急，時間少 12 秒', hp:0, t:-12, bomb:4.5, spd:1, bonus:1.4},
+  {id:'coco',   name:'椰子巨人', fill:'url(#g-coco)',  body:blob(108,100),    hat:CROWN, deco:'<path d="M40 110c20-20 40-26 60-24M200 110c-20-20-40-26-60-24M60 216c20 12 40 16 60 16s40-4 60-16" fill="none" stroke="#3A2414" stroke-opacity=".5" stroke-width="6" stroke-linecap="round"/>', trait:'殼超硬，要多切 3 顆，但動作慢', hp:3, t:14, bomb:7, spd:.85, bonus:1.4},
+  {id:'grape',  name:'葡萄女王', fill:'url(#g-plum)',  body:spiky(12,100,90), hat:CROWN, deco:'<circle cx="70" cy="196" r="12" fill="#C49BFF" fill-opacity=".5"/><circle cx="170" cy="196" r="12" fill="#C49BFF" fill-opacity=".5"/>', trait:'她的水果飛得比較快', hp:0, t:0, bomb:5, spd:1.3, bonus:1.3}
+];
+function bossSVG(b){ return `<svg viewBox="0 0 240 250">${b.hat}<path d="${b.body}" fill="${b.fill}" stroke="#241D17" stroke-width="7" stroke-linejoin="round"/>${b.deco}${FACE}</svg>`; }
+let lastBoss='';
+function pickBoss(){
+  const seen=dexOf(G.name), fresh=BOSSES.filter(b=>!seen[b.id] && b.id!==lastBoss), rest=BOSSES.filter(b=>b.id!==lastBoss);
+  const b = fresh.length && Math.random()<.65 ? pick(fresh) : pick(rest);
+  lastBoss=b.id; return b;
+}
+/* 圖鑑：每個名字各自記錄打倒過哪些魔王 */
+function dexAll(){ const d=store.get('fruit-dex'); return (d && typeof d==='object')?d:{}; }
+function dexOf(name){ return dexAll()[name]||{}; }
+function dexAdd(name,id){ const all=dexAll(); all[name]=all[name]||{}; const first=!all[name][id]; all[name][id]=(all[name][id]||0)+1; store.set('fruit-dex',all); return first; }
+function openDex(name){
+  const seen=dexOf(name), got=BOSSES.filter(b=>seen[b.id]).length;
+  $('#dexWho').textContent=`${name} 的圖鑑：已解鎖 ${got}／${BOSSES.length}`;
+  $('#dexGrid').innerHTML=BOSSES.map(b=>{ const c=seen[b.id]||0;
+    return `<div class="dexcard ${c?'':'lock'}">${bossSVG(b)}<b>${c?b.name:'？？？'}</b><small>${c?b.trait:'打倒牠才會解鎖'}</small><span>${c?`打倒 ${c} 次`:'尚未打倒'}</span></div>`; }).join('');
+  $('#dex').hidden=false;
+}
+
+/* ---------- Boss 關 ---------- */
+function bossQ(def){
+  const d=G.diff, hp=[5,6,8][d]+def.hp;
   for(let t=0;t<60;t++){
     let q;
     if(G.game==='fm') q=pick([()=>Q_FM.mult(d),()=>Q_FM.notMult(d),()=>Q_FM.notFac(d),()=>Q_FM.rule()])();
@@ -685,25 +786,27 @@ function bossQ(){
   const q=Q_FM.notMult(0); q.need=Math.min(hp,q.good.length-1); q.got=0; return q;
 }
 function startBoss(){
-  const q=bossQ();
+  const def=pickBoss(), q=bossQ(def);
   G.q=q; G.qMissed=false; G.qNo++; G.sinceGood=1; G.spawnIn=1.2;
-  G.boss={hp:q.need, max:q.need, t:[40,40,45][G.diff], bombIn:5};
-  const b=$('#boss'); b.hidden=false; b.className='boss in';
-  showQ(); say(`切中 ${q.need} 顆正確的水果就能打倒果王！小心牠丟炸彈`, 'bad');
+  G.boss={def, hp:q.need, max:q.need, t:[40,40,45][G.diff]+def.t, bombIn:def.bomb};
+  const b=$('#boss'); b.innerHTML=bossSVG(def); b.hidden=false; b.className='boss in';
+  showQ(); say(`${def.name}來襲！${def.trait}。切中 ${q.need} 顆正確的水果打倒牠`, 'bad');
   [196,185,175,165].forEach((f,k)=>beep(f,.22,'sawtooth',.07,k*.16));
 }
 function endBoss(win){
-  const q=G.q, b=$('#boss');
-  G.log.push({text:'果王關卡：'+q.text, ok:win, hint:q.hint});
+  const q=G.q, b=$('#boss'), def=G.boss.def;
+  G.log.push({text:def.name+'關卡：'+q.text, ok:win, hint:q.hint});
   if(win){
-    const bonus=Math.round(120*[1,1.5,2][G.diff]); G.score+=bonus; G.kills++;
+    const bonus=Math.round(120*[1,1.5,2][G.diff]*def.bonus); G.score+=bonus; G.kills++;
+    const first=dexAdd(G.name, def.id); if(first) G.newDex.push(def.name);
+    heroReact('yay');
     G.hearts=Math.min(5,G.hearts+1); drawHearts();
     const r=b.getBoundingClientRect(), c={x:r.left+r.width/2, y:r.top+r.height/2, fs:r.width*.5};
     for(let k=0;k<4;k++) setTimeout(()=>burst({x:c.x+(Math.random()-.5)*r.width*.6, y:c.y+(Math.random()-.5)*r.height*.6, fs:c.fs}, Math.random()*6.28, ['#9BD23C','#FFD873','#fff','#E4405F']), k*110);
-    popText(c, '+'+bonus); say(`打倒果王！加 ${bonus} 分，還補回一顆愛心`, 'good');
+    popText(c, '+'+bonus); say(`打倒${def.name}！加 ${bonus} 分，補回一顆愛心${first?'，圖鑑解鎖！':''}`, 'good');
     [523,659,784,1047,1319].forEach((f,k)=>beep(f,.16,'triangle',.08,k*.09));
     b.className='boss dead';
-  } else { say('時間到，果王逃走了！下次再挑戰', 'bad'); b.className='boss out'; }
+  } else { say(`時間到，${def.name}逃走了！下次再挑戰`, 'bad'); b.className='boss out'; }
   setTimeout(()=>{ if(!G.boss) b.hidden=true; }, 700);
   G.boss=null;
   fruits.forEach(o=>{ if(!o.dead){ o.dead=true; o.el.classList.add('fade'); setTimeout(()=>o.el.remove(),400); } });
@@ -716,12 +819,22 @@ function say(text, cls){
 
 /* ---------- 飛果：從上面掉下來，用手指劃過去切開 ---------- */
 const ITEMS=[
-  {id:'ice',  ico:'❄️', w:2, msg:'冰凍！水果變慢 6 秒'},
-  {id:'star', ico:'⭐', w:2, msg:'雙倍星！10 秒內分數加倍'},
-  {id:'clock',ico:'⏰', w:2, msg:'加時鐘！多 10 秒'},
-  {id:'heart',ico:'💗', w:1, msg:'補回一顆愛心'},
-  {id:'lens', ico:'🔍', w:2, msg:'放大鏡！正確答案發光 6 秒'},
-  {id:'bomb', ico:'💣', w:3, msg:'切到炸彈，扣一顆愛心！'}
+  // 好道具
+  {id:'ice',    ico:'❄️', w:2, name:'冰凍星',   msg:'冰凍！水果變慢 6 秒'},
+  {id:'star',   ico:'⭐', w:2, name:'雙倍星',   msg:'雙倍星！10 秒內分數加倍'},
+  {id:'clock',  ico:'⏰', w:2, name:'加時鐘',   msg:'加時鐘！多 10 秒'},
+  {id:'heart',  ico:'💗', w:1, name:'愛心',     msg:'補回一顆愛心'},
+  {id:'lens',   ico:'🔍', w:2, name:'放大鏡',   msg:'放大鏡！正確答案發光 6 秒'},
+  {id:'rainbow',ico:'🌈', w:1, name:'彩虹',     msg:'彩虹！錯的水果全部消失'},
+  {id:'magnet', ico:'🧲', w:1, name:'磁鐵',     msg:'磁鐵幫你切了一顆正確答案'},
+  {id:'coin',   ico:'🪙', w:2, name:'金幣',     msg:'撿到金幣，加 30 分'},
+  {id:'shield', ico:'🛡️', w:1, name:'護盾',     msg:'護盾！可以擋下一次失誤或陷阱'},
+  // 陷阱：切到會倒楣
+  {id:'bomb',   ico:'💣', w:3, bad:true, name:'炸彈',   msg:'切到炸彈，扣一顆愛心！'},
+  {id:'cracker',ico:'🧨', w:1, bad:true, name:'鞭炮',   msg:'鞭炮嚇一跳，時間少 10 秒！'},
+  {id:'smoke',  ico:'🌫️', w:1, bad:true, name:'煙霧彈', msg:'煙霧彈！畫面起霧 5 秒'},
+  {id:'shroom', ico:'🍄', w:1, bad:true, name:'毒蘑菇', msg:'毒蘑菇！扣 30 分'},
+  {id:'twister',ico:'🌪️', w:1, bad:true, name:'旋風',   msg:'旋風！水果加速亂飛 5 秒'}
 ];
 const JUICE={mango:['#FFB52E','#FFE36E'],apple:['#E12F45','#FFD9C9'],pear:['#B9D645','#F4F58A'],orange:['#FF8E1F','#FFD27A'],plum:['#7B4FD6','#E7B6FF'],melon:['#E4405F','#8EE08A']};
 const VW=()=>innerWidth||document.documentElement.clientWidth, VH=()=>innerHeight||document.documentElement.clientHeight;
@@ -736,7 +849,7 @@ function freeX(fs){   // 挑一條上方沒有別的水果的直線，避免疊�
 function launch(el, extra){
   const W=VW(), H=VH(), fs=fruitSize();
   if(!W || !H) return null;
-  const life=SPEED[G.speed].life*(.85+Math.random()*.3);
+  const life=SPEED[G.speed].life*(.85+Math.random()*.3)/(G.boss?G.boss.def.spd:1);
   el.style.setProperty('--fs',fs+'px');
   // 從底部往上拋：飛到高點再掉回去，整趟飛行時間由「飛果速度」決定
   const x=freeX(fs), y0=H+fs*.6, apex=Math.max(170+fs*.4, H*(.24+Math.random()*.2)), D=y0-apex, g=8*D/(life*life);
@@ -765,8 +878,8 @@ function spawn(){
 function spawnItem(force){
   const pool=ITEMS.filter(it=>!(it.id==='heart' && G.hearts>=5));
   const bag=[]; pool.forEach(it=>{ for(let k=0;k<it.w;k++) bag.push(it); });
-  const it=force?ITEMS.find(x=>x.id===force):pick(bag), el=document.createElement('div');
-  el.className='fruit item'+(it.id==='bomb'?' bomb':'');
+  const it=force==='trap'?pick(ITEMS.filter(x=>x.bad)):force?ITEMS.find(x=>x.id===force):pick(bag), el=document.createElement('div');
+  el.className='fruit item'+(it.bad?' bomb':'');
   el.innerHTML=`<i class="body"><b class="orb">${it.ico}</b></i>`;
   launch(el,{item:it});
 }
@@ -812,9 +925,10 @@ function drawFx(dt){
     for(let k=1;k<trail.length;k++){
       if(trail[k].brk) continue;
       const a=1-(now-trail[k].t)/170;
-      fctx.strokeStyle=`rgba(255,255,255,${a})`; fctx.lineWidth=3+a*13;
+      const bl=hero().blade;
+      fctx.strokeStyle=`rgba(${bl[0]},${a})`; fctx.lineWidth=3+a*13;
       fctx.beginPath(); fctx.moveTo(trail[k-1].x,trail[k-1].y); fctx.lineTo(trail[k].x,trail[k].y); fctx.stroke();
-      fctx.strokeStyle=`rgba(255,216,115,${a*.8})`; fctx.lineWidth=1+a*5; fctx.stroke();
+      fctx.strokeStyle=`rgba(${bl[1]},${a*.9})`; fctx.lineWidth=1+a*6; fctx.stroke();
     }
   }
   for(const r of rings){ r.t+=dt; const k=r.t/.35; fctx.strokeStyle=r.c; fctx.globalAlpha=Math.max(0,1-k); fctx.lineWidth=10*(1-k)+1; fctx.beginPath(); fctx.arc(r.x,r.y,r.r*(1+k*1.6),0,6.28); fctx.stroke(); }
@@ -832,21 +946,42 @@ function loseHeart(){
 function hitItem(f, ang){
   f.dead=true; f.el.remove();
   const it=f.item;
-  if(it.id==='bomb'){
-    burst(f, ang, ['#241D17','#FF8E1F','#FFD873']);
-    loseHeart(); G.wrong++; popText(f,'💥',true); say(it.msg,'bad');
+  if(it.bad){
+    if(G.shield){   // 護盾擋掉
+      G.shield=false; burst(f, ang, ['#DDF3FF','#7CC8FF','#fff']);
+      popText(f,'🛡️'); say(`護盾擋下了${it.name}！`,'good');
+      [988,784].forEach((n,k)=>beep(n,.1,'sine',.06,k*.06)); hud(); return;
+    }
+    burst(f, ang, ['#241D17','#FF8E1F','#FFD873']); heroReact('ouch');
+    popText(f, it.ico, true); say(it.msg,'bad');
     beep(90,.4,'sawtooth',.09); beep(60,.5,'square',.06,.05);
-    $('#flash').classList.remove('go'); void $('#flash').offsetWidth; $('#flash').classList.add('go');
-    if(G.hearts<=0){ if(!G.pendingNext) G.log.push({text:G.q.text, ok:false, hint:G.q.hint}); end('hearts'); }
+    if(it.id==='bomb'){
+      loseHeart(); G.wrong++;
+      $('#flash').classList.remove('go'); void $('#flash').offsetWidth; $('#flash').classList.add('go');
+      if(G.hearts<=0){ if(!G.pendingNext) G.log.push({text:G.q.text, ok:false, hint:G.q.hint}); end('hearts'); }
+    }
+    if(it.id==='cracker') G.timeLeft=Math.max(1,G.timeLeft-10);
+    if(it.id==='smoke') G.fogT=5;
+    if(it.id==='shroom') G.score=Math.max(0,G.score-30);
+    if(it.id==='twister') G.windT=5;
   } else {
     burst(f, ang, ['#FFD873','#FFFFFF','#9BD23C']);
+    popText(f, it.ico); say(it.msg,'good');
+    [784,988,1175,1568].forEach((n,k)=>beep(n,.1,'sine',.06,k*.05));
     if(it.id==='ice') G.iceT=6;
     if(it.id==='star') G.starT=10;
     if(it.id==='lens') G.lensT=6;
     if(it.id==='clock'){ G.timeLeft+=10; G.total+=10; }
     if(it.id==='heart'){ G.hearts=Math.min(5,G.hearts+1); drawHearts(); }
-    popText(f, it.ico); say(it.msg,'good');
-    [784,988,1175,1568].forEach((n,k)=>beep(n,.1,'sine',.06,k*.05));
+    if(it.id==='coin') G.score+=30;
+    if(it.id==='shield') G.shield=true;
+    if(it.id==='rainbow'){
+      fruits.forEach(o=>{ if(!o.dead && !o.item && !G.q.good.includes(o.v)){ o.dead=true; o.el.remove(); burst(o, Math.random()*6.28, ['#FF6B6B','#FFD873','#9BD23C','#7CC8FF','#C49BFF']); } });
+    }
+    if(it.id==='magnet'){
+      const t=fruits.find(o=>!o.dead && !o.item && G.q.good.includes(o.v));
+      if(t && G.lock<=0) hit(t, ang); else { G.score+=10; say('磁鐵沒吸到水果，送你 10 分','good'); }
+    }
   }
   hud();
 }
@@ -860,7 +995,7 @@ function hit(f, ang){
     if(G.starT>0) pts*=2;
     G.score+=pts; popText(f,'+'+pts); burst(f, ang);
     say('答對了！'+q.why(f.v),'good');
-    swish(); beep(660,.08); beep(880,.1,'triangle',.08,.07); if(G.streak%5===0) beep(1320,.18,'triangle',.07,.16);
+    heroReact('yay'); swish(); beep(660,.08); beep(880,.1,'triangle',.08,.07); if(G.streak%5===0) beep(1320,.18,'triangle',.07,.16);
     q.got++;
     if(q.need>1) q.good=q.good.filter(v=>v!==f.v);   // 同一個數字不會再出現，要找別的答案
     if(G.boss){
@@ -875,8 +1010,9 @@ function hit(f, ang){
       G.lock=.9; G.pendingNext=true;
     } else showQ();
   } else {
+    if(G.shield){ G.shield=false; f.dead=true; f.el.classList.add('fade'); setTimeout(()=>f.el.remove(),350); popText(f,'🛡️'); say('護盾擋下了這次失誤：'+q.why(f.v),'good'); beep(988,.1,'sine',.06); hud(); return; }
     f.dead=true; f.el.classList.add('miss'); setTimeout(()=>{ f.el.classList.add('fade'); setTimeout(()=>f.el.remove(),350); },500);
-    loseHeart(); G.wrong++; G.qMissed=true;
+    loseHeart(); G.wrong++; G.qMissed=true; heroReact('ouch');
     popText(f,'✗',true);
     say(q.why(f.v),'bad');
     beep(170,.22,'square',.06);
@@ -980,18 +1116,19 @@ function frame(now){
 function update(dt){
   if(G && !G.over && !G.paused){
     G.timeLeft-=dt;
-    G.iceT=Math.max(0,G.iceT-dt); G.starT=Math.max(0,G.starT-dt); G.lensT=Math.max(0,G.lensT-dt);
-    const slow=G.iceT>0?.4:1;
+    G.iceT=Math.max(0,G.iceT-dt); G.starT=Math.max(0,G.starT-dt); G.lensT=Math.max(0,G.lensT-dt); G.fogT=Math.max(0,G.fogT-dt); G.windT=Math.max(0,G.windT-dt);
+    const slow=(G.iceT>0?.4:1)*(G.windT>0?1.7:1);
+    $('#fog').classList.toggle('on', G.fogT>0);
     if(G.lock>0){ G.lock-=dt; if(G.lock<=0 && G.pendingNext){ G.pendingNext=false; if(G.pendingBoss){ G.pendingBoss=false; startBoss(); } else nextQ(); } }
     else {
       G.spawnIn-=dt*slow;
       const maxOn=[4,4,5,5,6][G.speed]+(G.boss?1:0);
       if(G.spawnIn<=0 && fruits.filter(f=>!f.dead && !f.item).length<maxOn){ spawn(); G.spawnIn=SPEED[G.speed].gap*(.8+Math.random()*.4); }
       G.itemIn-=dt;
-      if(G.itemIn<=0){ spawnItem(); G.itemIn=9+Math.random()*6; }
+      if(G.itemIn<=0){ spawnItem(); G.itemIn=6+Math.random()*5; }
       if(G.boss){
         G.boss.t-=dt; G.boss.bombIn-=dt;
-        if(G.boss.bombIn<=0){ spawnItem('bomb'); G.boss.bombIn=4.5+Math.random()*3; }
+        if(G.boss.bombIn<=0){ spawnItem(Math.random()<.6?'bomb':'trap'); G.boss.bombIn=G.boss.def.bomb*(.8+Math.random()*.5); }
         if(G.boss.t<=0) endBoss(false);
       }
     }
@@ -1025,7 +1162,10 @@ function end(reason){
   const old=store.get(bestKey())||0, isBest=G.score>old && G.score>0;
   if(isBest) store.set(bestKey(),G.score);
   $('#resTitle').textContent = reason==='hearts' ? '愛心用完了！' : '時間到！';
-  $('#boss').hidden=true;
+  $('#boss').hidden=true; $('#fog').classList.remove('on');
+  const hadHeroes=G.had, pa=profAll(), pr=profOf(G.name);
+  pr.right+=G.right; pr.best=Math.max(pr.best,G.score); pa[G.name]=pr; store.set('fruit-prof',pa);
+  const newHeroes=HEROES.filter(h=>heroOK(h,G.name) && !hadHeroes.includes(h.id)).map(h=>h.ico+h.name);
   const entry={id:Date.now()+'-'+Math.random().toString(36).slice(2,6), name:G.name, game:G.game, diff:G.diff, score:G.score, right:G.right, acc, kills:G.kills,
     date:new Date().toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'})};
   let rank=0;
@@ -1036,7 +1176,7 @@ function end(reason){
     rank=boardFor(G.game,G.diff).findIndex(e=>e.id===entry.id)+1;
   }
   $('#resSub').textContent = (rank===1 ? `${G.name}，你是這個難度的第 1 名！` : rank ? `${G.name}，你在這個難度排第 ${rank} 名。` : '這次沒有得分，不列入排行榜。')
-    + (G.kills ? `　打倒果王 ${G.kills} 次。` : '');
+    + (G.kills ? `　打倒魔王 ${G.kills} 次。` : '') + (G.newDex.length ? `　圖鑑新解鎖：${G.newDex.join('、')}！` : '') + (newHeroes.length ? `　新角色解鎖：${newHeroes.join('、')}！` : '');
   $('#resScore').textContent=G.score;
   $('#resRight').textContent=G.right; $('#resWrong').textContent=G.wrong; $('#resAcc').textContent=acc+'%'; $('#resStreak').textContent=G.best;
   const missed=G.log.filter(l=>!l.ok);
@@ -1066,12 +1206,17 @@ function setPause(p){
 }
 function toMenu(){
   if(G) G.over=true;
-  $('#boss').hidden=true; $('#board').hidden=true;
+  $('#boss').hidden=true; $('#board').hidden=true; $('#dex').hidden=true;
   fruits.forEach(f=>f.el.remove()); fruits=[];
   $('#stage').hidden=true; $('#result').hidden=true; $('#pause').hidden=true; $('#menu').hidden=false; syncMenu();
 }
 function syncMenu(){
   $$('.game').forEach(b=>b.setAttribute('aria-checked', b.dataset.game===cfg.game));
+  const who=playerName();
+  if(!heroOK(HEROES.find(h=>h.id===cfg.hero)||HEROES[0], who)) cfg.hero='ninja';
+  $$('.heropick').forEach(b=>{ const h=HEROES.find(x=>x.id===b.dataset.hero), ok=heroOK(h,who);
+    b.setAttribute('aria-checked', h.id===cfg.hero); b.classList.toggle('lock', !ok); b.querySelector('b').textContent=ok?h.name:'🔒 '+h.need; });
+  $('#heroHint').textContent=`${who} 已解鎖 ${unlockedIds(who).length}／${HEROES.length} 個角色`;
   $$('.seg').forEach(seg=>{ const k=seg.dataset.opt; seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-checked', +b.dataset.v===cfg[k])); });
   $('#diffHint').textContent=DIFF_HINT[cfg.game][cfg.diff];
   $('#speedHint').textContent=SPEED[cfg.speed].hint;
@@ -1086,6 +1231,16 @@ $('#games').addEventListener('click',e=>{ const b=e.target.closest('.game'); if(
 $$('.seg').forEach(seg=>seg.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ cfg[seg.dataset.opt]=+b.dataset.v; syncMenu(); beep(520,.04,'sine',.04); } }));
 $('#startBtn').onclick=start; $('#againBtn').onclick=start;
 $('#boardBtn').onclick=()=>openBoard(cfg.game,cfg.diff);
+$('#heroes').innerHTML=HEROES.map(h=>`<button type="button" class="heropick" role="radio" data-hero="${h.id}"><span>${h.ico}</span><b>${h.name}</b></button>`).join('');
+$('#heroes').addEventListener('click',e=>{ const b=e.target.closest('.heropick'); if(!b) return;
+  const h=HEROES.find(x=>x.id===b.dataset.hero);
+  if(!heroOK(h,playerName())){ $('#heroHint').textContent=`「${h.name}」還沒解鎖：${h.need}`; beep(200,.15,'square',.04); return; }
+  cfg.hero=h.id; store.set('fruit-cfg',cfg); syncMenu(); beep(520,.04,'sine',.04); });
+$('#dexBtn').onclick=()=>openDex(playerName());
+$('#resDexBtn').onclick=()=>openDex(G.name);
+$('#dexClose').onclick=()=>{ $('#dex').hidden=true; };
+// 點到別的視窗或程式時自動暫停，音樂也會停
+window.addEventListener('blur',()=>{ if(G && !G.over && !$('#stage').hidden) setPause(true); });
 $('#resBoardBtn').onclick=()=>openBoard(G.game,G.diff);
 $('#boardClose').onclick=()=>{ $('#board').hidden=true; };
 $('#bGame').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ bGame=b.dataset.v; renderBoard(); } });
@@ -1096,7 +1251,7 @@ $('#boardClear').onclick=e=>{   // 連按兩次才清除，避免誤按
   store.set('fruit-board', loadBoard().filter(x=>!(x.game===bGame && x.diff===bDiff))); b.classList.remove('armed'); b.textContent='清除這個難度的紀錄'; renderBoard();
 };
 $('#pname').value=store.get('fruit-name')||'';
-$('#pname').addEventListener('input',()=>store.set('fruit-name',$('#pname').value.trim()));
+$('#pname').addEventListener('input',()=>{ store.set('fruit-name',$('#pname').value.trim()); syncMenu(); });
 $('#pname').addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Enter') start(); });
 $('#menuBtn').onclick=toMenu; $('#quitBtn').onclick=toMenu;
 $('#pauseBtn').onclick=()=>setPause(true); $('#resumeBtn').onclick=()=>setPause(false);
@@ -1105,10 +1260,9 @@ $('#musicBtn').onclick=()=>{ musicOn=!musicOn; store.set('fruit-music',musicOn);
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' || e.key.toLowerCase()==='p'){ if(G && !G.over && !$('#stage').hidden) setPause(!G.paused); } });
 document.addEventListener('visibilitychange',()=>{ if(document.hidden && G && !G.over && !$('#stage').hidden) setPause(true); });
 
-(function(){ let d=''; const N=22; for(let k=0;k<N*2;k++){ const a=k/(N*2)*6.283-1.57, r=k%2?84:102, x=120+Math.cos(a)*r*1.02, y=146+Math.sin(a)*r*.98; d+=(k?'L':'M')+x.toFixed(1)+' '+y.toFixed(1); } $('#bossBody').setAttribute('d',d+'Z'); })();
 syncMenu();
 requestAnimationFrame(frame);
-window.__fruit={makeQ, Q_FM, Q_CM, MIX, update, bossQ, state:()=>G, startBoss};   // 給測試用
+window.__fruit={makeQ, Q_FM, Q_CM, MIX, update, bossQ, state:()=>G, startBoss, BOSSES};   // 給測試用
 })();
 </script>
 </body>
